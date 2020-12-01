@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  
+  node:
+    build:
+      context: .
+      dockerfile: ./DockerFile
+    ports:
+      - 8080:8080
+    volumes:
+      - ./dist:/usr/src/app/dist
+      - ./views:/usr/src/app/views
