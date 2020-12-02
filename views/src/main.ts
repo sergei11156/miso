@@ -1,6 +1,8 @@
 import "phaser";
 import { Scene } from "phaser";
 import { GameScene } from "./ts/gameScene";
+import socket_io from "socket.io-client";
+const io = socket_io();
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
