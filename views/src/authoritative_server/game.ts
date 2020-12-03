@@ -13,7 +13,7 @@ const config: Phaser.Types.Core.GameConfig = {
     default: "arcade",
     arcade: {
       debug: true,
-      gravity: {y: 0, x: 0}
+      gravity: {y: 0, x: 0},
     }
   },
   height: worldHeight,
@@ -25,12 +25,13 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 export class MiscoGame extends Phaser.Game {
+  // worldWidth = worldWidth
   constructor(config: Phaser.Types.Core.GameConfig) {
     super(config);
   }
 }
 
-window.onload = () => {
-  let game = new MiscoGame(config);
-};
+console.log("FILE CODE");
+
+let game = new MiscoGame(config);
 

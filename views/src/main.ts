@@ -2,7 +2,6 @@ import "phaser";
 import { Scene } from "phaser";
 import { GameScene } from "./ts/gameScene";
 import socket_io from "socket.io-client";
-const io = socket_io();
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -36,14 +35,17 @@ const config: Phaser.Types.Core.GameConfig = {
   backgroundColor: "#5DADE2",
 };
 export class MiscoGame extends Phaser.Game {
+  io: SocketIOClient.Socket;
+
   constructor(config: Phaser.Types.Core.GameConfig) {
     super(config);
+    this.io = socket_io();
   }
 }
-io.on("updatePlayerPosition",  function (params:any) {
-  console.log(params);
+// io.on("updatePlayerPosition",  function (params:any) {
+//   console.log(params);
   
-})
+// })
 window.onload = () => {
   let game = new MiscoGame(config);
 };

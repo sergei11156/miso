@@ -14,6 +14,8 @@ export default class GameServer {
   }
 
   private setupAuthoritativeServer() {
+    console.log("AAA SHIT");
+    
     JSDOM.fromFile("/usr/src/app/views/dist/room.html", {
       // To run the scripts in the html file
       runScripts: "dangerously",
