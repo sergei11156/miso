@@ -40,7 +40,10 @@ export class MiscoGame extends Phaser.Game {
     super(config);
   }
 }
-
+io.on("updatePlayerPosition",  function (params:any) {
+  console.log(params);
+  
+})
 window.onload = () => {
   let game = new MiscoGame(config);
 };

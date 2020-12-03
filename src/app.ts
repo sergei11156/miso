@@ -1,4 +1,6 @@
 import express from "express";
+import GameServer from "./GameServer";
+
 const app = express();
 
 const port = 8080; // default port to listen
@@ -22,7 +24,10 @@ const server = app.listen( port, () => {
 } );
 
 const io: SocketIO.Server = require("socket.io")(server)
-io.on("connection", function (socket: SocketIO.Socket) {
-    console.log("new connecton");
+const gameServer = new GameServer(io);
+
+
+// io.on("connection", function (socket: SocketIO.Socket) {
+//     console.log("new connecton");
     
-})
+// })
