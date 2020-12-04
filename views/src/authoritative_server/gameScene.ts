@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "crypto";
 import "phaser";
 import { userInputEvents } from "../interfaces";
 import DudeServer from "./dudeServer";
@@ -5,15 +6,12 @@ import PlatformServer from "./PlatformServer";
 import UserInputServer from "./userInputServer";
 
 export class GameScene extends Phaser.Scene {
-  platforms: Phaser.Physics.Arcade.Group;
-
   io: any;
   startPlayerYPosition = 200;
   static lastObjectId: number = 0;
   playerId: number;
 
   worldWidth = 4000;
-  dudesGroup: Phaser.Physics.Arcade.Group;
 
   constructor() {
     super({
@@ -32,15 +30,19 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.io = window.io;
 
-    this.platforms = this.physics.add.group();
-    this.dudesGroup = this.physics.add.group();
+    const platforms = this.physics.add.group();
+    const dudesGroup = this.physics.add.group();
 
-    this.physics.add.collider(this.dudesGroup, this.platforms, () =>
+    this.physics.add.collider(dudesGroup, platforms, (object1, object2) => {
+      // console.log(object1);
+      // console.log(object2);
+      // this.physics.pause();
       this.restartGame()
+    }
     );
 
-    DudeServer.init(this.io, this.dudesGroup, this.worldWidth / 2);
-    PlatformServer.init(this.io, this.platforms);
+    DudeServer.init(this.io, dudesGroup, this.worldWidth / 2);
+    PlatformServer.init(this.io, platforms);
 
     this.io.on("connection", (socket: SocketIO.Socket) => {
       console.log("new connection");
@@ -50,13 +52,13 @@ export class GameScene extends Phaser.Scene {
       let dude: DudeServer;
 
       socket.on("init", () => {
-        dude = DudeServer.add(GameScene.getNewId(), socket);
+        dude = DudeServer.add(socket);
         this.restartGame();
       });
 
       socket.on("disconnect", (reason) => {
         if (dude) {
-          DudeServer.remove(dude.id);
+          DudeServer.dudes.remove(dude, true, true)
         }
       });
     });
@@ -73,8 +75,4 @@ export class GameScene extends Phaser.Scene {
     DudeServer.startGame();
   }
 
-  static getNewId() {
-    this.lastObjectId++;
-    return this.lastObjectId;
-  }
 }

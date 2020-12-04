@@ -5,14 +5,15 @@ import {
   userInputEvents,
 } from "../interfaces";
 import DudeServer from "./dudeServer";
+import GameObject from "./gameObject";
 import { GameScene } from "./gameScene";
 
-export default class PlatformServer {
+export default class PlatformServer extends GameObject {
   static platforms: Phaser.Physics.Arcade.Group;
   static platformTimer: number = 0;
   static io: any;
-  static platformsServer: PlatformServer[] = [];
   static yOffsetOfDude = 200;
+  dragging = false;
 
   static update(delta: number, dudes: DudeServer[]) {
     this.platformTimer += delta;
@@ -24,25 +25,17 @@ export default class PlatformServer {
     }
   }
 
-  private _id: number;
-  get id() {
-    return this._id;
-  }
-  sprite: Phaser.Physics.Arcade.Sprite;
-  dragging = false;
-  constructor(id: number, platform: Phaser.Physics.Arcade.Sprite) {
-    PlatformServer.platformsServer.push(this);
-    this._id = id;
-    this.sprite = platform;
+  constructor(x:number, y: number) {
+    super(PlatformServer.platforms.scene, x, y, "ground")
   }
 
   static init(io: any, platforms: Physics.Arcade.Group) {
     this.io = io;
-    this.platforms = platforms
-
+    this.platforms = platforms;
   }
   static getPlatformServer(id: number) {
-    for (const platform of this.platformsServer) {
+    let platforms = this.platforms.children.getArray() as PlatformServer[];
+    for (const platform of platforms) {
       if (platform.id == id) {
         return platform;
       }
@@ -51,21 +44,24 @@ export default class PlatformServer {
   }
 
   static spawnPlatform(dude: DudeServer) {
-    let playerBottomCenter = dude.sprite.getBottomCenter();
-    const yOffset = this.yOffsetOfDude/2;
-    let platformX = playerBottomCenter.x - Phaser.Math.Between(-yOffset, yOffset);
+    let playerBottomCenter = dude.getBottomCenter();
+    const yOffset = this.yOffsetOfDude / 2;
+    let platformX =
+      playerBottomCenter.x - Phaser.Math.Between(-yOffset, yOffset);
     let platformY = playerBottomCenter.y + 800;
-    let platform = this.platforms.create(platformX, platformY, "ground");
-    const platformId = GameScene.getNewId();
 
+
+    let platformServer = new PlatformServer(platformX, platformY);
+    
+    this.platforms.add(platformServer);
+    
     this.io.emit(userInputEvents.create, {
       key: "ground",
-      id: platformId,
+      id: platformServer.id,
       x: platformX,
       y: platformY,
     });
 
-    new PlatformServer(platformId, platform);
   }
 
   static dragStart(params: PlatformDragStartOrEnd, socket: SocketIO.Socket) {
@@ -102,20 +98,17 @@ export default class PlatformServer {
       }
       platformServer.dragTo(params);
       socket.broadcast.emit(userInputEvents.dragging, params);
-
     } catch (error) {
       console.log(error);
     }
   }
 
   dragTo(params: PlatformDragging) {
-    this.sprite.setPosition(params.x, params.y);
+    this.setPosition(params.x, params.y);
   }
 
   static clear() {
     this.platforms.clear(true, true);
     this.platformTimer = 0;
-    this.platformsServer = [];
   }
-
 }
