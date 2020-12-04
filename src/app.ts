@@ -3,7 +3,7 @@ import GameServer from "./GameServer";
 
 const app = express();
 
-const port = 8080; // default port to listen
+const port = 80; // default port to listen
 const views = "/usr/src/app/views/dist/";
 const assets = "/usr/src/app/views/assets/";
 
