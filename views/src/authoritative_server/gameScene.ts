@@ -1,5 +1,6 @@
-import { Vector } from "matter";
 import "phaser";
+import PlatformServer from "./PlatformServer";
+import UserInputServer from "./userInputServer";
 
 export class GameScene extends Phaser.Scene {
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -7,7 +8,7 @@ export class GameScene extends Phaser.Scene {
   platformTimer: number;
   io: any;
   startPlayerYPosition = 200;
-  lastObjectId: number = 0;
+  static lastObjectId: number = 0;
   playerId: number;
 
   worldWidth = 4000
@@ -18,7 +19,7 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  preload(): void {
+  preload() {
     this.load.spritesheet("dude", "../assets/dude.png", {
       frameWidth: 32,
       frameHeight: 48,
@@ -26,9 +27,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image("ground", "../assets/platform.png");
   }
 
-  create(): void {
-    console.log("CREATE 1");
-    
+  create() {
     this.player = this.physics.add.sprite(
       this.worldWidth/2,
       this.startPlayerYPosition,
@@ -42,28 +41,28 @@ export class GameScene extends Phaser.Scene {
       this.platforms,
       () => this.restartGame()
     );
+    PlatformServer.platforms = this.platforms
 
     this.platformTimer = 0;
 
     this.io = window.io;
+    PlatformServer.init(this.io);
+    
+    PlatformServer.player = this.player
 
     this.io.on("connection", (socket: SocketIO.Socket) => {
       console.log("new connecton");
-      
+      new UserInputServer(socket);
       socket.on("init", ()=> {
         this.restartGame(socket);
       });
     });
   }
+
+
   update(time: number, delta: number): void {
-    // this.io.emit("updatePlayerPosition", this.player.body.position);
-
-
-    this.platformTimer += delta;
-    if (this.platformTimer > 500) {
-      this.platformTimer = 0;
-      this.spawnPlatform();
-    }
+    PlatformServer.update(delta)
+    
 
     this.io.emit("update", {
       id: this.playerId,
@@ -72,47 +71,6 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  spawnPlatform() {
-    let playerBottomCenter = this.player.getBottomCenter();
-
-    let platformX = playerBottomCenter.x - Phaser.Math.Between(-400, 200);
-    let platformY = playerBottomCenter.y + 800;
-    let platform = this.platforms.create(platformX, platformY, "ground");
-
-    this.io.emit("create", {
-      key: "ground",
-      id: this.getNewId(),
-      x: platformX,
-      y: platformY,
-    });
-    // platform.setInteractive();
-    // this.input.setDraggable(platform);
-
-    // //  The pointer has to move 16 pixels before it's considered as a drag
-    // this.input.dragDistanceThreshold = 1;
-
-    // this.input.on("dragstart", function (pointer: any, gameObject: any) {
-    //   gameObject.setTint(0xff0000);
-    // });
-
-    // this.input.on(
-    //   "drag",
-    //   function (pointer: any, gameObject: any, dragX: any, dragY: any) {
-    //     gameObject.x = dragX;
-    //     gameObject.y = dragY;
-    //   }
-    // );
-
-    // this.input.on("dragend", function (pointer: any, gameObject: any) {
-    //   gameObject.clearTint();
-    // });
-  }
-
-  // platformCollision() {
-    // this.restartGame();
-    // alert("ПОТРАЧЕНО");
-  // }
-
   restartGame(socket?: SocketIO.Socket) {
     this.platforms.clear(true, true);
     this.player.body.position = new Phaser.Math.Vector2(
@@ -120,33 +78,23 @@ export class GameScene extends Phaser.Scene {
       this.startPlayerYPosition
     );
     this.player.setVelocityY(200);
-    if (socket) {
-      socket.emit("restartGame")
-      this.playerId = this.getNewId(); 
-      socket.emit("create", {
-        key: "dude",
-        id: this.playerId,
-        x: this.player.body.position.x,
-        y: this.player.body.position.y,
-        cameraFollow: true
-      });
-    } else {
-      this.io.emit("restartGame");
-      this.playerId = this.getNewId(); 
-      this.io.emit("create", {
-        key: "dude",
-        id: this.playerId,
-        x: this.player.body.position.x,
-        y: this.player.body.position.y,
-        cameraFollow: true
-      });
-    }
-    this.spawnPlatform();
+
+    this.io.emit("restartGame")
+    this.playerId = GameScene.getNewId(); 
+    this.io.emit("create", {
+      key: "dude",
+      id: this.playerId,
+      x: this.player.body.position.x,
+      y: this.player.body.position.y,
+      cameraFollow: true
+    });
+    
+    PlatformServer.spawnPlatform();
     console.log("create new dude " + this.playerId);
     
   }
   
-  private getNewId() {
+  static getNewId() {
     this.lastObjectId++;
     return this.lastObjectId;
   }
