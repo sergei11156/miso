@@ -14,6 +14,7 @@ export default class PlatformServer extends GameObject {
   static io: any;
   static yOffsetOfDude = 200;
   dragging = false;
+  static gameStarted: boolean = false;
 
   static update(delta: number, dudes: DudeServer[]) {
     this.platformTimer += delta;
@@ -65,6 +66,8 @@ export default class PlatformServer extends GameObject {
   }
 
   static dragStart(params: PlatformDragStartOrEnd, socket: SocketIO.Socket) {
+    if (!this.gameStarted) return;
+
     try {
       let platformServer = this.getPlatformServer(params.id);
       if (platformServer.dragging) {
@@ -78,6 +81,7 @@ export default class PlatformServer extends GameObject {
   }
 
   static dragEnd(params: PlatformDragStartOrEnd, socket: SocketIO.Socket) {
+    if (!this.gameStarted) return;
     try {
       let platformServer = this.getPlatformServer(params.id);
       if (!platformServer.dragging) {
@@ -91,6 +95,7 @@ export default class PlatformServer extends GameObject {
   }
 
   static dragging(params: PlatformDragging, socket: SocketIO.Socket) {
+    if (!this.gameStarted) return;
     try {
       let platformServer = this.getPlatformServer(params.id);
       if (!platformServer.dragging) {

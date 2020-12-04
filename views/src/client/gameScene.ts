@@ -18,6 +18,9 @@ export class GameScene extends Phaser.Scene {
   private cameraFollow?: GameObject;
   private gameObjects: GameObject[] = [];
   private _io: SocketIOClient.Socket;
+  statusText: Phaser.GameObjects.Text;
+  youDieText: Phaser.GameObjects.Text;
+
   constructor() {
     super({
       key: "GameScene",
@@ -56,23 +59,14 @@ export class GameScene extends Phaser.Scene {
 
       if (params.cameraFollow) {
         this.cameraFollow = gameObject;
-        if (this.cameraFollow) {
-          this.cameras.main.startFollow(
-            this.cameraFollow.sprite,
-            false,
-            1,
-            1,
-            0,
-            -(this.cameras.main.height / 2) * 0.7
-          );
-        }
+        this.cameraStartFollow();
       }
 
       this.gameObjects.push(gameObject);
       // console.log(this.gameObjects);
     });
 
-    this._io.on("update", (params: gameUpdateObject) => {
+    this._io.on(userInputEvents.update, (params: gameUpdateObject) => {
       // console.log("update " + params.id);
       try {
         let gameObject = this.getGameObject(params.id);
@@ -83,29 +77,45 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    this._io.on("restartGame", () => {
+    this._io.on(userInputEvents.restartGame, () => {
       this.restartGame();
     });
 
-    this._io.on("youDie", (params: youDie) => {
-      const myDeadBody = this.getGameObject(params.id);
-      const youDie = this.add.text(
-        myDeadBody.sprite.x,
-        myDeadBody.sprite.y,
+    this._io.on(userInputEvents.youDie, (params: youDie) => {
+      this.youDieText = this.add.text(
+        this.cameras.main.width / 2,
+        this.cameras.main.height / 2,
         "ВЫ НЕ СПАСЛИСЬ"
       );
-      youDie.scrollFactorX = 1;
-      youDie.scrollFactorY = 1;
-      const newFollow = this.getGameObject(params.newFollowId);
-      this.cameraFollow = newFollow;
+      this.youDieText.scrollFactorX = 0;
+      this.youDieText.scrollFactorY = 0;
+      if (params.newFollowId) {
+        const newFollow = this.getGameObject(params.newFollowId);
+        this.cameraFollow = newFollow;
+        this.cameraStartFollow();
+      }
+
       console.log("IM DIE");
+      Platform.imDead = true;
+    });
+    this._io.on(userInputEvents.win, () => {
+      console.log("I WIN");
+      
+      this.youDieText = this.add.text(
+        this.cameras.main.width / 2,
+        this.cameras.main.height / 2,
+        "ВЫ СПАСЛИСЬ! ТИПО ПОБЕДИЛИ, РЕСПЕКЕТ, КРАСАВА"
+      );
+      this.youDieText.scrollFactorX = 0;
+      this.youDieText.scrollFactorY = 0;
     });
     this._io.on(userInputEvents.remove, (params: die) => {
       console.log(params);
     });
-    this._io.on(userInputEvents.remove, (params: {id: number}) => {
+    this._io.on(userInputEvents.remove, (params: { id: number }) => {
       this.getGameObject(params.id).destroy();
-    })
+    });
+
     this.anims.create({
       key: "always",
       frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
@@ -116,12 +126,27 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, 20000, 2e6);
     this.physics.world.setBounds(0, 0, 20000, 2e6);
 
+    this.statusText = this.add.text(20, 20, "СТАТУС: НЕ ГОТОВ");
+
+    this.statusText.scrollFactorX = 0;
+    this.statusText.scrollFactorY = 0;
+    this.statusText.setInteractive();
+    this.statusText.on("pointerdown", () => {
+      this.statusText.text = "СТАТУС: ГОТОВ";
+      this._io.emit(userInputEvents.ready);
+    });
     this._io.emit(userInputEvents.init);
   }
   update(time: number, delta: number): void {}
 
   restartGame() {
     console.log("restartGAME");
+    this.statusText.text = "СТАТУС: НЕ ГОТОВ";
+
+    if (this.youDieText) {
+      this.youDieText.destroy();
+      this.youDieText = undefined;
+    }
 
     for (const gameObject of this.gameObjects) {
       gameObject.destroy();
@@ -136,5 +161,18 @@ export class GameScene extends Phaser.Scene {
       }
     }
     throw new Error("object with id:" + id + " not found");
+  }
+
+  cameraStartFollow() {
+    if (this.cameraFollow) {
+      this.cameras.main.startFollow(
+        this.cameraFollow.sprite,
+        false,
+        1,
+        1,
+        0,
+        -(this.cameras.main.height / 2) * 0.7
+      );
+    }
   }
 }

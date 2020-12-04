@@ -13,7 +13,7 @@ export class GameScene extends Phaser.Scene {
   playerId: number;
 
   worldWidth = 4000;
-  gameStarted = false;
+  private gameStarted = false;
 
   constructor() {
     super({
@@ -60,7 +60,7 @@ export class GameScene extends Phaser.Scene {
     this.io.on("connection", (socket: SocketIO.Socket) => {
       console.log("new connection");
 
-      new UserInputServer(socket);
+      let uis = new UserInputServer(socket, this);
 
       let dude: DudeServer;
 
@@ -73,6 +73,9 @@ export class GameScene extends Phaser.Scene {
           let removeId = dude.id;
           DudeServer.dudes.remove(dude, true, true);
           socket.broadcast.emit(userInputEvents.remove, {id: removeId})
+        }
+        if (uis) {
+          uis.remove();
         }
       });
     });
@@ -88,7 +91,16 @@ export class GameScene extends Phaser.Scene {
     this.physics.resume();
     this.io.emit(userInputEvents.restartGame);
     PlatformServer.clear();
-
+    this.gameStarted = true;
+    PlatformServer.gameStarted = true;
     DudeServer.startGame();
+  }
+
+  gameStop() {
+    this.gameStarted = false;
+    PlatformServer.clear();
+    PlatformServer.gameStarted = false;
+    UserInputServer.setAllToNotReady();
+    DudeServer.gameEnd();
   }
 }

@@ -144,16 +144,20 @@ export default class DudeServer extends GameObject {
   }
 
   youDied() {
+    const oldId = this.id;
     this.setVelocityY(0);
     this.setActive(false);
     console.log(this.id);
 
-    const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
+    // const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
+    
     const youDie: youDie = {
-      id: this.id,
-      newFollowId: newId.id,
+      id: oldId,
     };
-    const dieData: die = { id: this.id };
+    // if (newId) {
+    //   youDie.newFollowId = newId.id;
+    // }
+    const dieData: die = { id: oldId };
     this.socket.emit(userInputEvents.youDie, youDie);
     this.socket.broadcast.emit(userInputEvents.die, dieData);
     DudeServer.onSomeoneDie();
@@ -162,10 +166,20 @@ export default class DudeServer extends GameObject {
   static onSomeoneDie() {
     if (this.countAlive() < 2) {
       console.log("game end");
-      this.dudes.scene.physics.pause();
+      let aliveDude = this.dudes.getFirstAlive() as DudeServer;
+      if (aliveDude) {
+        console.log("SOME ONE WIN");
+        aliveDude.youWin();
+      }
+
+      (this.dudes.scene as GameScene).gameStop();
+      // this.dudes.scene.physics.pause();
 
       // (this.dudes.scene as GameScene).restartGame()
     }
+  }
+  youWin() {
+    this.socket.emit(userInputEvents.win)
   }
 
   static countAlive() {
@@ -177,4 +191,19 @@ export default class DudeServer extends GameObject {
     });
     return count;
   }
+
+  static gameEnd() {
+    this.arrangeDudesAndStop();
+  }
+
+  static arrangeDudesAndStop() {
+    let xAxis = this.worldCenterX;
+    this.dudes.children.each((dude: DudeServer) => {
+      dude.setVelocity(0);
+      dude.setPosition(xAxis, this.startPlayerYPosition);
+      xAxis += this.distanceBetweenDudes;
+      dude.updateDude();
+    })
+  }
+
 }

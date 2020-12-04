@@ -17,6 +17,7 @@ export interface draggingPlatform {
 export default class Platform extends GameObject {
   static io: any;
   static platforms: Platform[] = [];
+  static imDead: boolean = false;
 
   static add(scene: GameScene, params: gameCreateObject): any {
     let platform = new Platform(scene, params, this.io);
@@ -27,6 +28,9 @@ export default class Platform extends GameObject {
   static init(_io: any) {
     this.io = _io;
     this.io.on(userInputEvents.dragStart, (params: PlatformDragStartOrEnd) => {
+      if (Platform.imDead) {
+        return
+      }
       try {
         let platform = this.getPlatform(params.id);
         if (platform.dragging) {
@@ -40,6 +44,9 @@ export default class Platform extends GameObject {
     });
 
     this.io.on(userInputEvents.dragEnd, (params: PlatformDragStartOrEnd) => {
+      if (Platform.imDead) {
+        return
+      }
       try {
         let platform = this.getPlatform(params.id);
         if (!platform.dragging) {
@@ -53,6 +60,9 @@ export default class Platform extends GameObject {
     });
 
     this.io.on(userInputEvents.dragging, (params: PlatformDragging) => {
+      if (Platform.imDead) {
+        return
+      }
       try {
         let platform = this.getPlatform(params.id);
         if (!platform.dragging) {
@@ -96,7 +106,7 @@ export default class Platform extends GameObject {
     this.sprite.on(
       "drag",
       (pointer: any, dragX: number, dragY: number) => {
-        console.log("drag event x: " + dragX + " drag y: " + dragY);
+        // console.log("drag event x: " + dragX + " drag y: " + dragY);
         
         this.dragTo(dragX, dragY);
 
