@@ -5,14 +5,14 @@ var watchify = require("watchify");
 var tsify = require("tsify");
 var fancy_log = require("fancy-log");
 var paths = {
-  pages: ["src/*.html", "src/authoritative_server/room.html"],
+  pages: ["src/html/*.html"],
 };
 
 var watchedBrowserify = watchify(
   browserify({
     basedir: ".",
     debug: true,
-    entries: ["src/main.ts"],
+    entries: ["src/client/client.ts"],
     cache: {},
     packageCache: {},
   }).plugin(tsify)
@@ -26,7 +26,7 @@ var watchedBrowserifyServer = watchify(
   browserify({
     basedir: ".",
     debug: true,
-    entries: ["src/authoritative_server/game.ts"],
+    entries: ["src/authoritative_server/gameServer.ts"],
     cache: {},
     packageCache: {},
   }).plugin(tsify)

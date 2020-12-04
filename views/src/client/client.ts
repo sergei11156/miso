@@ -1,6 +1,6 @@
 import "phaser";
 import { Scene } from "phaser";
-import { GameScene } from "./ts/gameScene";
+import { GameScene } from "./gameScene";
 import socket_io from "socket.io-client";
 
 const config: Phaser.Types.Core.GameConfig = {

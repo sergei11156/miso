@@ -1,22 +1,11 @@
 import "phaser";
-import { MiscoGame } from "../main";
+import { gameCreateObject, gameUpdateObject } from "../interfaces";
+import { MiscoGame } from "./client";
 import Dude from "./Dude";
 import GameObject from "./gameObject";
 import Platform from "./Platform";
 
-export interface gameCreateObject {
-  key: string,
-  id: number,
-  x: number,
-  y: number,
-  cameraFollow?: boolean
-}
 
-export interface gameUpdateObject {
-  id: number,
-  x: number,
-  y: number
-}
 export class GameScene extends Phaser.Scene {
   // player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   platforms: Phaser.Physics.Arcade.Group;

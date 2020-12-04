@@ -1,5 +1,5 @@
+import { gameUpdateObject } from "../interfaces"
 import GameObject from "./gameObject"
-import { gameUpdateObject } from "./gameScene"
 
 export default class Dude extends GameObject{
 

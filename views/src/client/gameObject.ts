@@ -1,5 +1,6 @@
 import "phaser";
-import { gameCreateObject, GameScene, gameUpdateObject } from "./gameScene"
+import { gameCreateObject, gameUpdateObject } from "../interfaces";
+import { GameScene } from "./gameScene"
 export default class GameObject {
   private _id: number
   get id() {

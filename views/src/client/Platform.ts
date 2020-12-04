@@ -1,11 +1,12 @@
 import { Scene } from "phaser";
 import {
+  gameCreateObject,
   PlatformDragging,
   PlatformDragStartOrEnd,
   userInputEvents,
 } from "../interfaces";
 import GameObject from "./gameObject";
-import { gameCreateObject, GameScene } from "./gameScene";
+import { GameScene } from "./gameScene";
 
 export interface draggingPlatform {
   id: number;
