@@ -12,7 +12,11 @@ export interface PlatformDragging {
 export enum userInputEvents {
   dragStart = "dragStart",
   dragging = "dragging",
-  dragEnd = "dragEnd"
+  dragEnd = "dragEnd",
+  gameRestart = "gameRestart",
+  create = "create",
+  update = "update",
+  restartGame = "restartGame"
 }
 export interface gameCreateObject {
   key: string,

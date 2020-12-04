@@ -1,24 +1,26 @@
+import { Physics } from "phaser";
 import {
   PlatformDragging,
   PlatformDragStartOrEnd,
   userInputEvents,
 } from "../interfaces";
+import DudeServer from "./dudeServer";
 import { GameScene } from "./gameScene";
 
 export default class PlatformServer {
   static platforms: Phaser.Physics.Arcade.Group;
   static platformTimer: number = 0;
   static io: any;
-  static player: Phaser.Physics.Arcade.Sprite;
   static platformsServer: PlatformServer[] = [];
 
-  static update(delta: number) {
+  static update(delta: number, dude: DudeServer) {
     this.platformTimer += delta;
     if (this.platformTimer > 2000) {
       this.platformTimer = 0;
-      this.spawnPlatform();
+      this.spawnPlatform(dude);
     }
   }
+
   private _id: number;
   get id() {
     return this._id;
@@ -31,10 +33,11 @@ export default class PlatformServer {
     this.sprite = platform;
   }
 
-  static init(io: any) {
+  static init(io: any, platforms: Physics.Arcade.Group) {
     this.io = io;
-  }
+    this.platforms = platforms
 
+  }
   static getPlatformServer(id: number) {
     for (const platform of this.platformsServer) {
       if (platform.id == id) {
@@ -44,15 +47,15 @@ export default class PlatformServer {
     throw new Error(`platform ${id} not found`);
   }
 
-  static spawnPlatform() {
-    let playerBottomCenter = this.player.getBottomCenter();
+  static spawnPlatform(dude: DudeServer) {
+    let playerBottomCenter = dude.sprite.getBottomCenter();
 
     let platformX = playerBottomCenter.x - Phaser.Math.Between(-400, 200);
     let platformY = playerBottomCenter.y + 800;
     let platform = this.platforms.create(platformX, platformY, "ground");
     const platformId = GameScene.getNewId();
 
-    this.io.emit("create", {
+    this.io.emit(userInputEvents.create, {
       key: "ground",
       id: platformId,
       x: platformX,
@@ -105,4 +108,11 @@ export default class PlatformServer {
   dragTo(params: PlatformDragging) {
     this.sprite.setPosition(params.x, params.y);
   }
+
+  static clear() {
+    this.platforms.clear(true, true);
+    this.platformTimer = 0;
+    this.platformsServer = [];
+  }
+
 }
