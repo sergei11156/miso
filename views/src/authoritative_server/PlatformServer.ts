@@ -12,12 +12,15 @@ export default class PlatformServer {
   static platformTimer: number = 0;
   static io: any;
   static platformsServer: PlatformServer[] = [];
+  static yOffsetOfDude = 200;
 
-  static update(delta: number, dude: DudeServer) {
+  static update(delta: number, dudes: DudeServer[]) {
     this.platformTimer += delta;
     if (this.platformTimer > 2000) {
       this.platformTimer = 0;
-      this.spawnPlatform(dude);
+      for (const dude of dudes) {
+        this.spawnPlatform(dude);
+      }
     }
   }
 
@@ -49,8 +52,8 @@ export default class PlatformServer {
 
   static spawnPlatform(dude: DudeServer) {
     let playerBottomCenter = dude.sprite.getBottomCenter();
-
-    let platformX = playerBottomCenter.x - Phaser.Math.Between(-400, 200);
+    const yOffset = this.yOffsetOfDude/2;
+    let platformX = playerBottomCenter.x - Phaser.Math.Between(-yOffset, yOffset);
     let platformY = playerBottomCenter.y + 800;
     let platform = this.platforms.create(platformX, platformY, "ground");
     const platformId = GameScene.getNewId();

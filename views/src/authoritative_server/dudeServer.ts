@@ -3,6 +3,7 @@ import { gameCreateObject, gameUpdateObject, userInputEvents } from "../interfac
 import PlatformServer from "./PlatformServer";
 
 export default class DudeServer {
+  static distanceBetweenDudes = 300;
   static defaultYVelocity = 200;
   static dudesGroup: Phaser.Physics.Arcade.Group;
   static startPlayerYPosition = 200;
@@ -18,7 +19,7 @@ export default class DudeServer {
   private _xAxis: number;
 
   static add(id: number, socket: SocketIO.Socket) {
-    const dude = new DudeServer(socket, id, 2000);
+    const dude = new DudeServer(socket, id, this.worldCenterX);
     this.dudes.push(dude);
 
     return dude;
@@ -47,7 +48,7 @@ export default class DudeServer {
     let xAxisOffset = 0;
     for (const dude of this.dudes) {
       dude.gameStart(xAxisOffset);
-      xAxisOffset += 200;
+      xAxisOffset += this.distanceBetweenDudes;
       PlatformServer.spawnPlatform(dude);
     }
   }
@@ -76,8 +77,8 @@ export default class DudeServer {
   static update(delta: number) {
     for (const dude of this.dudes) {
       dude.updateDude()
-      PlatformServer.update(delta, dude)
     }
+    PlatformServer.update(delta, this.dudes)
   }
   updateDude() {
     const params: gameUpdateObject = {
