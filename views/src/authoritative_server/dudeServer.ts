@@ -11,7 +11,7 @@ import PlatformServer from "./PlatformServer";
 import { Scene } from "phaser";
 import { GameScene } from "./gameScene";
 
-export default class DudeServer extends GameObject{
+export default class DudeServer extends GameObject {
   static distanceBetweenDudes = 300;
   static defaultYVelocity = 200;
   static dudes: Phaser.Physics.Arcade.Group;
@@ -19,15 +19,38 @@ export default class DudeServer extends GameObject{
   static worldCenterX: number;
   static io: any;
   socket: SocketIO.Socket;
-  
+
   private _xAxis: number;
 
   static add(socket: SocketIO.Socket) {
-    const dude = new DudeServer(socket, this.worldCenterX);
+    const newDude = new DudeServer(socket, this.getNewPositionForDude());
+    newDude.sendCreateEvent();
 
-    return dude;
+    // socket.emit(userInputEvents.create)
+    this.dudes.children.each((dude: DudeServer) => {
+      if (dude.id == newDude.id) {
+        return;
+      }
+      let params = dude.getCreateParams();
+      socket.emit(userInputEvents.create, params)
+    })
+    return newDude;
   }
 
+  static getNewPositionForDude() {
+    let maxX = 0;
+    this.dudes.children.each((dude: DudeServer) => {
+      if (dude.body.x > maxX) {
+        maxX = dude.body.x;
+      }
+    });
+    if (maxX == 0) {
+      maxX = this.worldCenterX;
+    } else {
+      maxX += this.distanceBetweenDudes;
+    }
+    return maxX;
+  }
   static init(
     io: any,
     group: Phaser.Physics.Arcade.Group,
@@ -40,38 +63,40 @@ export default class DudeServer extends GameObject{
 
   static startGame() {
     let xAxisOffset = 0;
-    const dudes = this.dudes.children.getArray() as DudeServer[];
-    
-    for (const dude of dudes) {
+    this.dudes.children.each((dude: DudeServer) => {
       dude.gameStart(xAxisOffset);
       xAxisOffset += this.distanceBetweenDudes;
       PlatformServer.spawnPlatform(dude);
-    }
+    });
   }
 
   gameStart(xAxisOffset: number) {
     this.setActive(true);
     const x = xAxisOffset + DudeServer.worldCenterX;
     this.setPosition(x, DudeServer.startPlayerYPosition);
-
-    let params: gameCreateObject = {
-      key: "dude",
-      id: this.id,
-      x,
-      y: DudeServer.startPlayerYPosition,
-      cameraFollow: true,
-    };
-    this.socket.emit(userInputEvents.create, params);
-    
-    params.cameraFollow = false;
-    this.socket.broadcast.emit(userInputEvents.create, params);
+    this.sendCreateEvent();
     this.setVelocityY(DudeServer.defaultYVelocity);
   }
 
-  // static clear() {
-  //   this.dudesGroup.clear(true, true);
-  //   this.dudes = [];
-  // }
+  sendCreateEvent() {
+    let params = this.getCreateParams();
+
+    params.cameraFollow = true;
+    this.socket.emit(userInputEvents.create, params);
+
+    params.cameraFollow = false;
+    this.socket.broadcast.emit(userInputEvents.create, params);
+  }
+
+  getCreateParams() {
+    let params: gameCreateObject = {
+      key: "dude",
+      id: this.id,
+      x: this.body.x,
+      y: this.body.y,
+    };
+    return params;
+  }
 
   static update(delta: number) {
     // if (this.dudes.length == 1) {
@@ -105,9 +130,13 @@ export default class DudeServer extends GameObject{
     throw new Error(`dude ${id} not found`);
   }
 
-
   constructor(socket: SocketIO.Socket, xAxis: number) {
-    super(DudeServer.dudes.scene, xAxis, DudeServer.startPlayerYPosition, "dude")
+    super(
+      DudeServer.dudes.scene,
+      xAxis,
+      DudeServer.startPlayerYPosition,
+      "dude"
+    );
     this._xAxis = xAxis;
     this.socket = socket;
     DudeServer.dudes.add(this, true);
@@ -118,23 +147,23 @@ export default class DudeServer extends GameObject{
     this.setVelocityY(0);
     this.setActive(false);
     console.log(this.id);
-    
+
     const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
     const youDie: youDie = {
       id: this.id,
-      newFollowId: newId.id
-    }
-    const dieData:die = { id: this.id }
-    this.socket.emit(userInputEvents.youDie, youDie)
-    this.socket.broadcast.emit(userInputEvents.die, dieData)
-    DudeServer.onSomeoneDie()
+      newFollowId: newId.id,
+    };
+    const dieData: die = { id: this.id };
+    this.socket.emit(userInputEvents.youDie, youDie);
+    this.socket.broadcast.emit(userInputEvents.die, dieData);
+    DudeServer.onSomeoneDie();
   }
 
   static onSomeoneDie() {
     if (this.countAlive() < 2) {
       console.log("game end");
       this.dudes.scene.physics.pause();
-      
+
       // (this.dudes.scene as GameScene).restartGame()
     }
   }
@@ -142,10 +171,10 @@ export default class DudeServer extends GameObject{
   static countAlive() {
     let count = 0;
     this.dudes.children.each((gmObj) => {
-      if(gmObj.active) {
-        count++
+      if (gmObj.active) {
+        count++;
       }
-    })
+    });
     return count;
   }
 }

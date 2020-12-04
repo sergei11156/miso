@@ -9,6 +9,7 @@ export interface PlatformDragging {
   y: number
 }
 
+
 export enum userInputEvents {
   dragStart = "dragStart",
   dragging = "dragging",
@@ -18,7 +19,9 @@ export enum userInputEvents {
   update = "update",
   restartGame = "restartGame",
   youDie = "youDie",
-  die = "die"
+  die = "die",
+  init = "init",
+  remove = "remove"
 }
 export interface youDie {
   id: number,

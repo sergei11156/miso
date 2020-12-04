@@ -13,6 +13,7 @@ export class GameScene extends Phaser.Scene {
   playerId: number;
 
   worldWidth = 4000;
+  gameStarted = false;
 
   constructor() {
     super({
@@ -34,20 +35,23 @@ export class GameScene extends Phaser.Scene {
     const platforms = this.physics.add.group();
     const dudesGroup = this.physics.add.group();
 
-    this.physics.add.collider(dudesGroup, platforms, (object1: GameObject, object2: GameObject) => {
-      let dude, platform;
-      if (object1.texture.key == "dude") {
-        dude = object1 as DudeServer;
-        platform = object2 as PlatformServer;
-      } else {
-        dude = object2 as DudeServer;
-        platform = object1 as PlatformServer;
-      } 
-      
-      dude.youDied();
-      // this.physics.pause();
-      // this.restartGame();
-    }
+    this.physics.add.collider(
+      dudesGroup,
+      platforms,
+      (object1: GameObject, object2: GameObject) => {
+        let dude, platform;
+        if (object1.texture.key == "dude") {
+          dude = object1 as DudeServer;
+          platform = object2 as PlatformServer;
+        } else {
+          dude = object2 as DudeServer;
+          platform = object1 as PlatformServer;
+        }
+
+        dude.youDied();
+        // this.physics.pause();
+        // this.restartGame();
+      }
     );
 
     DudeServer.init(this.io, dudesGroup, this.worldWidth / 2);
@@ -62,27 +66,29 @@ export class GameScene extends Phaser.Scene {
 
       socket.on("init", () => {
         dude = DudeServer.add(socket);
-        this.restartGame();
       });
 
       socket.on("disconnect", (reason) => {
         if (dude) {
-          DudeServer.dudes.remove(dude, true, true)
+          let removeId = dude.id;
+          DudeServer.dudes.remove(dude, true, true);
+          socket.broadcast.emit(userInputEvents.remove, {id: removeId})
         }
       });
     });
   }
 
   update(time: number, delta: number): void {
-    DudeServer.update(delta);
+    if (this.gameStarted) {
+      DudeServer.update(delta);
+    }
   }
 
   restartGame() {
     this.physics.resume();
-    this.io.emit(userInputEvents.restartGame)
+    this.io.emit(userInputEvents.restartGame);
     PlatformServer.clear();
 
     DudeServer.startGame();
   }
-
 }

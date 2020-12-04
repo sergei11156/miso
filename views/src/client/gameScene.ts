@@ -100,9 +100,11 @@ export class GameScene extends Phaser.Scene {
       this.cameraFollow = newFollow;
       console.log("IM DIE");
     });
-    this._io.on("die", (params: die) => {
+    this._io.on(userInputEvents.remove, (params: die) => {
       console.log(params);
-      
+    });
+    this._io.on(userInputEvents.remove, (params: {id: number}) => {
+      this.getGameObject(params.id).destroy();
     })
     this.anims.create({
       key: "always",
@@ -111,16 +113,14 @@ export class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
-    this._io.emit("init");
     this.cameras.main.setBounds(0, 0, 20000, 2e6);
     this.physics.world.setBounds(0, 0, 20000, 2e6);
-  }
-  update(time: number, delta: number): void {
 
+    this._io.emit(userInputEvents.init);
   }
+  update(time: number, delta: number): void {}
 
   restartGame() {
-    
     console.log("restartGAME");
 
     for (const gameObject of this.gameObjects) {
