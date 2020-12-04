@@ -1,12 +1,15 @@
 import { platform } from "os";
 import GameObject from "./gameObject";
 import {
+  die,
   gameCreateObject,
   gameUpdateObject,
   userInputEvents,
+  youDie,
 } from "../interfaces";
 import PlatformServer from "./PlatformServer";
 import { Scene } from "phaser";
+import { GameScene } from "./gameScene";
 
 export default class DudeServer extends GameObject{
   static distanceBetweenDudes = 300;
@@ -38,6 +41,7 @@ export default class DudeServer extends GameObject{
   static startGame() {
     let xAxisOffset = 0;
     const dudes = this.dudes.children.getArray() as DudeServer[];
+    
     for (const dude of dudes) {
       dude.gameStart(xAxisOffset);
       xAxisOffset += this.distanceBetweenDudes;
@@ -46,6 +50,7 @@ export default class DudeServer extends GameObject{
   }
 
   gameStart(xAxisOffset: number) {
+    this.setActive(true);
     const x = xAxisOffset + DudeServer.worldCenterX;
     this.setPosition(x, DudeServer.startPlayerYPosition);
 
@@ -57,6 +62,7 @@ export default class DudeServer extends GameObject{
       cameraFollow: true,
     };
     this.socket.emit(userInputEvents.create, params);
+    
     params.cameraFollow = false;
     this.socket.broadcast.emit(userInputEvents.create, params);
     this.setVelocityY(DudeServer.defaultYVelocity);
@@ -79,12 +85,14 @@ export default class DudeServer extends GameObject{
     PlatformServer.update(delta, dudes);
   }
   updateDude() {
-    const params: gameUpdateObject = {
-      id: this.id,
-      x: this.body.x,
-      y: this.body.y,
-    };
-    DudeServer.io.emit(userInputEvents.update, params);
+    if (this.active) {
+      const params: gameUpdateObject = {
+        id: this.id,
+        x: this.body.x,
+        y: this.body.y,
+      };
+      DudeServer.io.emit(userInputEvents.update, params);
+    }
   }
 
   static getDudeServer(id: number) {
@@ -104,5 +112,40 @@ export default class DudeServer extends GameObject{
     this.socket = socket;
     DudeServer.dudes.add(this, true);
     this.setCollideWorldBounds(false);
+  }
+
+  youDied() {
+    this.setVelocityY(0);
+    this.setActive(false);
+    console.log(this.id);
+    
+    const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
+    const youDie: youDie = {
+      id: this.id,
+      newFollowId: newId.id
+    }
+    const dieData:die = { id: this.id }
+    this.socket.emit(userInputEvents.youDie, youDie)
+    this.socket.broadcast.emit(userInputEvents.die, dieData)
+    DudeServer.onSomeoneDie()
+  }
+
+  static onSomeoneDie() {
+    if (this.countAlive() < 2) {
+      console.log("game end");
+      this.dudes.scene.physics.pause();
+      
+      // (this.dudes.scene as GameScene).restartGame()
+    }
+  }
+
+  static countAlive() {
+    let count = 0;
+    this.dudes.children.each((gmObj) => {
+      if(gmObj.active) {
+        count++
+      }
+    })
+    return count;
   }
 }

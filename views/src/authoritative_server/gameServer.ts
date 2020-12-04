@@ -31,7 +31,5 @@ export class MiscoGame extends Phaser.Game {
   }
 }
 
-console.log("FILE CODE");
-
 let game = new MiscoGame(config);
 

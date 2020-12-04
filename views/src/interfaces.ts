@@ -16,7 +16,16 @@ export enum userInputEvents {
   gameRestart = "gameRestart",
   create = "create",
   update = "update",
-  restartGame = "restartGame"
+  restartGame = "restartGame",
+  youDie = "youDie",
+  die = "die"
+}
+export interface youDie {
+  id: number,
+  newFollowId: number
+}
+export interface die {
+  id: number
 }
 export interface gameCreateObject {
   key: string,

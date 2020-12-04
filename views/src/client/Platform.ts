@@ -117,8 +117,6 @@ export default class Platform extends GameObject {
   }
 
   dragTo(x: number, y: number) {
-    console.log("dragging to x: " + x + " to y: " + y + " from " + this.sprite.x + " " + this.sprite.y);
-    
     this.sprite.x = x;
     this.sprite.y = y;
   }

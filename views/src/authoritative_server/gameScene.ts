@@ -2,6 +2,7 @@ import { timingSafeEqual } from "crypto";
 import "phaser";
 import { userInputEvents } from "../interfaces";
 import DudeServer from "./dudeServer";
+import GameObject from "./gameObject";
 import PlatformServer from "./PlatformServer";
 import UserInputServer from "./userInputServer";
 
@@ -33,11 +34,19 @@ export class GameScene extends Phaser.Scene {
     const platforms = this.physics.add.group();
     const dudesGroup = this.physics.add.group();
 
-    this.physics.add.collider(dudesGroup, platforms, (object1, object2) => {
-      // console.log(object1);
-      // console.log(object2);
+    this.physics.add.collider(dudesGroup, platforms, (object1: GameObject, object2: GameObject) => {
+      let dude, platform;
+      if (object1.texture.key == "dude") {
+        dude = object1 as DudeServer;
+        platform = object2 as PlatformServer;
+      } else {
+        dude = object2 as DudeServer;
+        platform = object1 as PlatformServer;
+      } 
+      
+      dude.youDied();
       // this.physics.pause();
-      this.restartGame()
+      // this.restartGame();
     }
     );
 
@@ -69,6 +78,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   restartGame() {
+    this.physics.resume();
     this.io.emit(userInputEvents.restartGame)
     PlatformServer.clear();
 
