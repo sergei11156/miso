@@ -22,16 +22,6 @@ gulp.task("copy-html", function () {
   return gulp.src(paths.pages).pipe(gulp.dest("dist"));
 });
 
-var watchedBrowserifyServer = watchify(
-  browserify({
-    basedir: ".",
-    debug: true,
-    entries: ["src/authoritative_server/gameServer.ts"],
-    cache: {},
-    packageCache: {},
-  }).plugin(tsify)
-);
-
 
 function bundle() {
   return watchedBrowserify
@@ -50,9 +40,7 @@ function serverBundle() {
 }
 gulp.task("serverBundle", serverBundle);
 
-gulp.task("default", gulp.series(gulp.parallel("copy-html"), gulp.parallel("serverBundle") , bundle));
+gulp.task("default", gulp.series(gulp.parallel("copy-html"), bundle));
 
-watchedBrowserifyServer.on("update", serverBundle);
-watchedBrowserifyServer.on("log", fancy_log);
 watchedBrowserify.on("update", bundle);
 watchedBrowserify.on("log", fancy_log);

@@ -1,4 +1,3 @@
-import { platform } from "os";
 import GameObject from "./gameObject";
 import {
   die,
@@ -6,9 +5,9 @@ import {
   gameUpdateObject,
   userInputEvents,
   youDie,
-} from "../interfaces";
+} from "./interfaces";
 import PlatformServer from "./PlatformServer";
-import { Scene } from "phaser";
+import "phaser";
 import { GameScene } from "./gameScene";
 
 export default class DudeServer extends GameObject {
@@ -26,14 +25,13 @@ export default class DudeServer extends GameObject {
     const newDude = new DudeServer(socket, this.getNewPositionForDude());
     newDude.sendCreateEvent();
 
-    // socket.emit(userInputEvents.create)
     this.dudes.children.each((dude: DudeServer) => {
       if (dude.id == newDude.id) {
         return;
       }
       let params = dude.getCreateParams();
-      socket.emit(userInputEvents.create, params)
-    })
+      socket.emit(userInputEvents.create, params);
+    });
     return newDude;
   }
 
@@ -99,10 +97,6 @@ export default class DudeServer extends GameObject {
   }
 
   static update(delta: number) {
-    // if (this.dudes.length == 1) {
-    //   this.dudes[0].win()
-
-    // }
     const dudes = this.dudes.children.getArray() as DudeServer[];
     for (const dude of dudes) {
       dude.updateDude();
@@ -133,13 +127,14 @@ export default class DudeServer extends GameObject {
   constructor(socket: SocketIO.Socket, xAxis: number) {
     super(
       DudeServer.dudes.scene,
+      "dude",
       xAxis,
-      DudeServer.startPlayerYPosition,
-      "dude"
+      DudeServer.startPlayerYPosition
     );
     this._xAxis = xAxis;
     this.socket = socket;
     DudeServer.dudes.add(this, true);
+    this.body.setSize(32, 48);
     this.setCollideWorldBounds(false);
   }
 
@@ -150,7 +145,7 @@ export default class DudeServer extends GameObject {
     console.log(this.id);
 
     // const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
-    
+
     const youDie: youDie = {
       id: oldId,
     };
@@ -173,13 +168,10 @@ export default class DudeServer extends GameObject {
       }
 
       (this.dudes.scene as GameScene).gameStop();
-      // this.dudes.scene.physics.pause();
-
-      // (this.dudes.scene as GameScene).restartGame()
     }
   }
   youWin() {
-    this.socket.emit(userInputEvents.win)
+    this.socket.emit(userInputEvents.win);
   }
 
   static countAlive() {
@@ -203,7 +195,6 @@ export default class DudeServer extends GameObject {
       dude.setPosition(xAxis, this.startPlayerYPosition);
       xAxis += this.distanceBetweenDudes;
       dude.updateDude();
-    })
+    });
   }
-
 }

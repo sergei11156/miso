@@ -1,24 +1,22 @@
-import { Physics } from "phaser";
 import {
   PlatformDragging,
   PlatformDragStartOrEnd,
   userInputEvents,
-} from "../interfaces";
+} from "./interfaces";
 import DudeServer from "./dudeServer";
 import GameObject from "./gameObject";
-import { GameScene } from "./gameScene";
 
 export default class PlatformServer extends GameObject {
   static platforms: Phaser.Physics.Arcade.Group;
   static platformTimer: number = 0;
-  static io: any;
+  static io: SocketIO.Server;
   static yOffsetOfDude = 200;
   dragging = false;
   static gameStarted: boolean = false;
 
   static update(delta: number, dudes: DudeServer[]) {
     this.platformTimer += delta;
-    if (this.platformTimer > 2000) {
+    if (this.platformTimer > 1000) {
       this.platformTimer = 0;
       for (const dude of dudes) {
         this.spawnPlatform(dude);
@@ -26,11 +24,11 @@ export default class PlatformServer extends GameObject {
     }
   }
 
-  constructor(x:number, y: number) {
-    super(PlatformServer.platforms.scene, x, y, "ground")
+  constructor(x: number, y: number) {
+    super(PlatformServer.platforms.scene, "ground", x, y);
   }
 
-  static init(io: any, platforms: Physics.Arcade.Group) {
+  static init(io: SocketIO.Server, platforms: Phaser.Physics.Arcade.Group) {
     this.io = io;
     this.platforms = platforms;
   }
@@ -51,18 +49,16 @@ export default class PlatformServer extends GameObject {
       playerBottomCenter.x - Phaser.Math.Between(-yOffset, yOffset);
     let platformY = playerBottomCenter.y + 800;
 
-
     let platformServer = new PlatformServer(platformX, platformY);
-    
+
     this.platforms.add(platformServer);
-    
+    platformServer.body.setSize(150, 66);
     this.io.emit(userInputEvents.create, {
       key: "ground",
       id: platformServer.id,
       x: platformX,
       y: platformY,
     });
-
   }
 
   static dragStart(params: PlatformDragStartOrEnd, socket: SocketIO.Socket) {

@@ -1,4 +1,8 @@
-import { PlatformDragging, PlatformDragStartOrEnd, userInputEvents } from "../interfaces";
+import {
+  PlatformDragging,
+  PlatformDragStartOrEnd,
+  userInputEvents,
+} from "./interfaces";
 import { GameScene } from "./gameScene";
 import PlatformServer from "./PlatformServer";
 
@@ -19,13 +23,13 @@ export default class UserInputServer {
     socket.on(userInputEvents.ready, () => {
       this.ready = true;
       console.log("player ready");
-      
+
       if (UserInputServer.isAllReady()) {
         console.log("all ready, start");
-        
+
         scene.restartGame();
       }
-    })
+    });
     UserInputServer.userInputs.add(this);
   }
   remove() {

@@ -1,13 +1,12 @@
-import { timingSafeEqual } from "crypto";
-import "phaser";
-import { userInputEvents } from "../interfaces";
+import { userInputEvents } from "./interfaces";
 import DudeServer from "./dudeServer";
 import GameObject from "./gameObject";
 import PlatformServer from "./PlatformServer";
 import UserInputServer from "./userInputServer";
+import GameServer from "./GameServer";
 
 export class GameScene extends Phaser.Scene {
-  io: any;
+  io: SocketIO.Server;
   startPlayerYPosition = 200;
   static lastObjectId: number = 0;
   playerId: number;
@@ -21,16 +20,9 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  preload() {
-    this.load.spritesheet("dude", "../assets/dude.png", {
-      frameWidth: 32,
-      frameHeight: 48,
-    });
-    this.load.image("ground", "../assets/platform.png");
-  }
-
   create() {
-    this.io = window.io;
+    const miscoGame = this.game as GameServer;
+    this.io = miscoGame.io;
 
     const platforms = this.physics.add.group();
     const dudesGroup = this.physics.add.group();
@@ -40,7 +32,9 @@ export class GameScene extends Phaser.Scene {
       platforms,
       (object1: GameObject, object2: GameObject) => {
         let dude, platform;
-        if (object1.texture.key == "dude") {
+        console.log(object1.key);
+
+        if (object1.key == "dude") {
           dude = object1 as DudeServer;
           platform = object2 as PlatformServer;
         } else {
@@ -49,14 +43,11 @@ export class GameScene extends Phaser.Scene {
         }
 
         dude.youDied();
-        // this.physics.pause();
-        // this.restartGame();
       }
     );
 
     DudeServer.init(this.io, dudesGroup, this.worldWidth / 2);
     PlatformServer.init(this.io, platforms);
-
     this.io.on("connection", (socket: SocketIO.Socket) => {
       console.log("new connection");
 
@@ -72,7 +63,7 @@ export class GameScene extends Phaser.Scene {
         if (dude) {
           let removeId = dude.id;
           DudeServer.dudes.remove(dude, true, true);
-          socket.broadcast.emit(userInputEvents.remove, {id: removeId})
+          socket.broadcast.emit(userInputEvents.remove, { id: removeId });
         }
         if (uis) {
           uis.remove();

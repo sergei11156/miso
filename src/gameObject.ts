@@ -1,6 +1,3 @@
-import DudeServer from "./dudeServer";
-import PlatformServer from "./PlatformServer";
-
 export default class GameObject extends Phaser.Physics.Arcade.Sprite {
   private static _lastObjectId: number = 0;
   static get newId() {
@@ -12,15 +9,19 @@ export default class GameObject extends Phaser.Physics.Arcade.Sprite {
   get id() {
     return this._id;
   }
-
+  private _key: string;
+  get key() {
+    return this._key;
+  }
   constructor(
     scene: Phaser.Scene,
+    key: string,
     x: number,
     y: number,
-    texture: string,
     frame?: string | number
   ) {
-    super(scene, x, y, texture, frame);
+    super(scene, x, y, "texture", frame);
     this._id = GameObject.newId;
+    this._key = key;
   }
 }
