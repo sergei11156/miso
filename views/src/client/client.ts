@@ -1,8 +1,6 @@
 import "phaser";
-import { Scene } from "phaser";
-import { GameScene } from "./gameScene";
 import socket_io from "socket.io-client";
-import RoomsScene from "./roomsScene";
+import RoomsScene from "./rooms/roomsScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -13,7 +11,6 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   title: "misco",
   parent: "game",
-  scene: [GameScene, RoomsScene],
   physics: {
     default: "arcade",
     arcade: {
@@ -34,6 +31,7 @@ export class MiscoGame extends Phaser.Game {
   constructor(config: Phaser.Types.Core.GameConfig) {
     super(config);
     this.io = socket_io();
+    this.scene.add("roomsScene", RoomsScene, true, { io: this.io })
   }
 }
 

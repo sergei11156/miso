@@ -1,4 +1,4 @@
-import { userInputEvents } from "./interfaces";
+import { userInputEvents } from "./interfaces/interfaces";
 import DudeServer from "./dudeServer";
 import GameObject from "./gameObject";
 import PlatformServer from "./PlatformServer";
@@ -13,17 +13,14 @@ export class GameScene extends Phaser.Scene {
 
   worldWidth = 4000;
   private gameStarted = false;
+  private key: string;
 
-  constructor() {
-    super({
-      key: "GameScene",
-    });
+  init(params: { io: SocketIO.Server; key: string }) {
+    this.io = params.io;
+    this.key = params.key;
   }
 
   create() {
-    const miscoGame = this.game as GameServer;
-    this.io = miscoGame.io;
-
     const platforms = this.physics.add.group();
     const dudesGroup = this.physics.add.group();
 
@@ -48,28 +45,33 @@ export class GameScene extends Phaser.Scene {
 
     DudeServer.init(this.io, dudesGroup, this.worldWidth / 2);
     PlatformServer.init(this.io, platforms);
-    this.io.on("connection", (socket: SocketIO.Socket) => {
-      console.log("new connection");
 
-      let uis = new UserInputServer(socket, this);
+    const connected = this.io.in(this.key).connected;
+    for (const key in connected) {
+      if (Object.prototype.hasOwnProperty.call(connected, key)) {
+        const socket = connected[key];
+        console.log("new connection");
 
-      let dude: DudeServer;
+        let uis = new UserInputServer(socket, this);
 
-      socket.on("init", () => {
-        dude = DudeServer.add(socket);
-      });
+        let dude: DudeServer;
 
-      socket.on("disconnect", (reason) => {
-        if (dude) {
-          let removeId = dude.id;
-          DudeServer.dudes.remove(dude, true, true);
-          socket.broadcast.emit(userInputEvents.remove, { id: removeId });
-        }
-        if (uis) {
-          uis.remove();
-        }
-      });
-    });
+        socket.on("init", () => {
+          dude = DudeServer.add(socket);
+        });
+
+        socket.on("disconnect", (reason) => {
+          if (dude) {
+            let removeId = dude.id;
+            DudeServer.dudes.remove(dude, true, true);
+            socket.broadcast.emit(userInputEvents.remove, { id: removeId });
+          }
+          if (uis) {
+            uis.remove();
+          }
+        });
+      }
+    }
   }
 
   update(time: number, delta: number): void {

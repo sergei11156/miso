@@ -2,7 +2,7 @@ import {
   PlatformDragging,
   PlatformDragStartOrEnd,
   userInputEvents,
-} from "./interfaces";
+} from "./interfaces/interfaces";
 import DudeServer from "./dudeServer";
 import GameObject from "./gameObject";
 

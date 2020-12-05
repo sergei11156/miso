@@ -1,20 +1,12 @@
-
 export interface PlatformDragStartOrEnd {
-  id: number
+  id: number;
 }
 
 export interface PlatformDragging {
-  id: number,
-  x: number,
-  y: number
+  id: number;
+  x: number;
+  y: number;
 }
-
-
-
-
-
-
-
 
 export enum userInputEvents {
   dragStart = "dragStart",
@@ -29,25 +21,30 @@ export enum userInputEvents {
   init = "init",
   remove = "remove",
   ready = "ready",
-  win = "youWin"
+  win = "youWin",
 }
+
+export enum clientEvents {
+  init = "init"
+}
+
 export interface youDie {
-  id: number,
-  newFollowId?: number
+  id: number;
+  newFollowId?: number;
 }
 export interface die {
-  id: number
+  id: number;
 }
 export interface gameCreateObject {
-  key: string,
-  id: number,
-  x: number,
-  y: number,
-  cameraFollow?: boolean
+  key: string;
+  id: number;
+  x: number;
+  y: number;
+  cameraFollow?: boolean;
 }
 
 export interface gameUpdateObject {
-  id: number,
-  x: number,
-  y: number
+  id: number;
+  x: number;
+  y: number;
 }

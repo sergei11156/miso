@@ -1,0 +1,57 @@
+import { updateRoomData } from "../interfaces/roomInterfaces";
+import { joinRoom } from "../interfaces/roomInterfaces";
+import { roomFromServerEvents } from "../interfaces/roomInterfaces";
+
+export default class Room {
+  private _key: string;
+  get key() {
+    return this._key;
+  }
+  private playersCount: number = 0;
+  private io: SocketIO.Server;
+
+  constructor(io: SocketIO.Server) {
+    this._key = this.makeKey(5);
+    this.io = io;
+  }
+
+  getRoomUpdateObject(): updateRoomData {
+    return {
+      key: this.key,
+      players: this.playersCount,
+    };
+  }
+
+  addUser(socket: SocketIO.Socket) {
+    socket.leave("wait");
+    socket.join(this.key);
+    this.playersCount++;
+    const joinObject: joinRoom = {
+      key: this.key
+    }
+    socket.emit(roomFromServerEvents.youConnectedTo, joinObject)
+    this.sendUpdateRoom();
+
+    socket.on("disconnect", () => {
+      socket.leave(this._key);
+      this.playersCount--;
+      this.sendUpdateRoom();
+    });
+  }
+
+  sendUpdateRoom() {
+    this.io
+      .to("wait")
+      .emit(roomFromServerEvents.update, this.getRoomUpdateObject());
+  }
+
+  makeKey(length: number) {
+    var result = "";
+    var characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+}

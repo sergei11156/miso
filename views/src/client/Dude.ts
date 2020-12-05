@@ -1,4 +1,4 @@
-import { gameUpdateObject } from "../interfaces"
+import { gameUpdateObject } from "./interfaces/interfaces"
 import GameObject from "./gameObject"
 
 export default class Dude extends GameObject{

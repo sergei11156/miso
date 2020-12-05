@@ -23,6 +23,9 @@ export enum userInputEvents {
   ready = "ready",
   win = "youWin",
 }
+export enum clientEvents {
+  init = "init"
+}
 export interface youDie {
   id: number;
   newFollowId?: number;

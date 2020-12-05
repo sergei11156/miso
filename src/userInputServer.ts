@@ -2,7 +2,7 @@ import {
   PlatformDragging,
   PlatformDragStartOrEnd,
   userInputEvents,
-} from "./interfaces";
+} from "./interfaces/interfaces";
 import { GameScene } from "./gameScene";
 import PlatformServer from "./PlatformServer";
 

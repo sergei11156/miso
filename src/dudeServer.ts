@@ -5,7 +5,7 @@ import {
   gameUpdateObject,
   userInputEvents,
   youDie,
-} from "./interfaces";
+} from "./interfaces/interfaces";
 import PlatformServer from "./PlatformServer";
 import "phaser";
 import { GameScene } from "./gameScene";

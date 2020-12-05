@@ -5,7 +5,7 @@ import {
   gameUpdateObject,
   userInputEvents,
   youDie,
-} from "../interfaces";
+} from "./interfaces/interfaces";
 import { MiscoGame } from "./client";
 import Dude from "./Dude";
 import GameObject from "./gameObject";
