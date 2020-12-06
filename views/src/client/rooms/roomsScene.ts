@@ -51,6 +51,7 @@ export default class RoomsScene extends Phaser.Scene {
         this.lastObjectYPositions,
         params.key,
         params.players,
+        params.isWaiting,
         (key) => this.joinRoom(key)
       );
       this.rooms[params.key] = room;

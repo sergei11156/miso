@@ -9,6 +9,7 @@ export enum roomFromClientEvents {
 export interface updateRoomData {
   key: string;
   players: number;
+  isWaiting: boolean;
 }
 
 export interface joinRoom {

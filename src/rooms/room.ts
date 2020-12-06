@@ -16,16 +16,23 @@ export default class Room {
     this._key = this.makeKey(5);
     this.io = io;
     this.roomScene = createRoom(this.key);
+    this.roomScene.setGameStateCallback(()=> {
+      this.sendUpdateRoom();
+    })
   }
 
   getRoomUpdateObject(): updateRoomData {
     return {
       key: this.key,
       players: this.playersCount,
+      isWaiting: !this.roomScene.gameStarted
     };
   }
 
   addUser(socket: SocketIO.Socket) {
+    if (this.roomScene.gameStarted) {
+      return;
+    }
     socket.leave("wait");
     socket.join(this.key);
     this.playersCount++;

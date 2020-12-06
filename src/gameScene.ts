@@ -14,7 +14,11 @@ export class GameScene extends Phaser.Scene {
   playerId: number;
 
   worldWidth = 4000;
-  private gameStarted = false;
+  private _gameStarted = false;
+  private _gameStateCallback: (gameStarted: boolean) => void;
+  get gameStarted() {
+    return this._gameStarted;
+  }
   private key: string;
   dudeManager: DudeManager;
   platformManager: PlatformManager;
@@ -39,7 +43,12 @@ export class GameScene extends Phaser.Scene {
       (object1: GameObject, object2: GameObject) =>
         this.dudeCollideWithPlatform(object1, object2)
     );
-    this.userConnectionManager = new userConnectionManager(params.key, params.io, this.platformManager, this);
+    this.userConnectionManager = new userConnectionManager(
+      params.key,
+      params.io,
+      this.platformManager,
+      this
+    );
   }
 
   create() {
@@ -47,7 +56,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   dudeCollideWithPlatform(object1: GameObject, object2: GameObject) {
-    if (!this.gameStarted) return;
+    if (!this._gameStarted) return;
 
     let dude, platform;
     console.log(object1.key);
@@ -64,7 +73,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
-    if (this.gameStarted) {
+    if (this._gameStarted) {
       this.dudeManager.update(delta);
     }
   }
@@ -73,17 +82,19 @@ export class GameScene extends Phaser.Scene {
     this.physics.resume();
     this.io.emit(userInputEvents.restartGame);
     this.platformManager.clear();
-    this.gameStarted = true;
+    this._gameStarted = true;
     this.platformManager.gameStarted = true;
     this.dudeManager.startGame();
+    this._gameStateCallback(true);
   }
 
   gameStop() {
-    this.gameStarted = false;
+    this._gameStarted = false;
     this.platformManager.clear();
     this.platformManager.gameStarted = false;
     this.userConnectionManager.setAllToNotReady();
     this.dudeManager.gameEnd();
+    this._gameStateCallback(false);
   }
 
   newUserConnect(socket: SocketIO.Socket) {
@@ -102,5 +113,9 @@ export class GameScene extends Phaser.Scene {
         this.userConnectionManager.remove(uis);
       }
     });
+  }
+
+  setGameStateCallback(f: (gameStarted: boolean)=>void) {
+    this._gameStateCallback = f;
   }
 }
