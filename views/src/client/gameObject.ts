@@ -14,12 +14,10 @@ export default class GameObject {
     id: number,
     x: number,
     y: number,
-    key: string,
-    group: Phaser.Physics.Arcade.Group
+    key: string
   ) {
     this._id = id;
-    this.sprite = scene.add.sprite(x, y, key);
-    group.add(this.sprite)
+    this.sprite = scene.physics.add.sprite(x, y, key);
   }
   updatePos(x: number, y: number) {
     this.sprite.setPosition(x, y)

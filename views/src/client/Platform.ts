@@ -20,11 +20,8 @@ export default class Platform extends GameObject {
   static platforms: Platform[] = [];
   static imDead: boolean = false;
 
-  static platformGroup: Phaser.Physics.Arcade.Group;
-
   static add(scene: GameScene, params: platformCreate): any {
-    this.platformGroup = scene.physics.add.group();
-    let platform = new Platform(scene, params, this.io, this.platformGroup);
+    let platform = new Platform(scene, params, this.io);
     this.platforms.push(platform);
     return platform;
   }
@@ -88,10 +85,9 @@ export default class Platform extends GameObject {
   constructor(
     scene: GameScene,
     params: platformCreate,
-    io: SocketIOClient.Socket,
-    group: Phaser.Physics.Arcade.Group
+    io: SocketIOClient.Socket
   ) {
-    super(scene, params.id, params.x, params.y, "ground", group);
+    super(scene, params.id, params.x, params.y, "ground");
     this.sprite.setInteractive();
     scene.input.setDraggable(this.sprite);
 
