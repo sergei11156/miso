@@ -7,6 +7,7 @@ import {
 } from "./interfaces/interfaces";
 import GameObject from "./gameObject";
 import { GameScene } from "./gameScene";
+import { platformCreate } from "./interfaces/platformInterfaces";
 
 export interface draggingPlatform {
   id: number;
@@ -19,7 +20,7 @@ export default class Platform extends GameObject {
   static platforms: Platform[] = [];
   static imDead: boolean = false;
 
-  static add(scene: GameScene, params: gameCreateObject): any {
+  static add(scene: GameScene, params: platformCreate): any {
     let platform = new Platform(scene, params, this.io);
     this.platforms.push(platform);
     return platform;
@@ -83,10 +84,10 @@ export default class Platform extends GameObject {
 
   constructor(
     scene: GameScene,
-    params: gameCreateObject,
+    params: platformCreate,
     io: SocketIOClient.Socket
   ) {
-    super(scene, params);
+    super(scene, params.id, params.x, params.y, "ground");
     this.sprite.setInteractive();
     scene.input.setDraggable(this.sprite);
 

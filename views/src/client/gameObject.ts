@@ -1,6 +1,7 @@
 import "phaser";
 import { gameCreateObject, gameUpdateObject } from "./interfaces/interfaces";
 import { GameScene } from "./gameScene"
+import { createDude } from "./interfaces/dudeInterfaces";
 export default class GameObject {
   private _id: number
   get id() {
@@ -8,10 +9,10 @@ export default class GameObject {
   }
   sprite: Phaser.GameObjects.Sprite
 
-  constructor(scene: GameScene, params: gameCreateObject) {
-    this._id = params.id
+  constructor(scene: GameScene, id: number, x: number, y: number, key: string) {
+    this._id = id
     
-    this.sprite = scene.add.sprite(params.x, params.y, params.key);
+    this.sprite = scene.add.sprite(x, y, key);
     console.log(this.sprite);
     
   }

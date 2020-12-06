@@ -1,3 +1,4 @@
+import { GameScene } from "../gameScene";
 import { updateRoomData } from "../interfaces/roomInterfaces";
 import { joinRoom } from "../interfaces/roomInterfaces";
 import { roomFromServerEvents } from "../interfaces/roomInterfaces";
@@ -9,10 +10,12 @@ export default class Room {
   }
   private playersCount: number = 0;
   private io: SocketIO.Server;
+  private roomScene: GameScene; 
 
-  constructor(io: SocketIO.Server) {
+  constructor(io: SocketIO.Server, createRoom: (key: string) => GameScene) {
     this._key = this.makeKey(5);
     this.io = io;
+    this.roomScene = createRoom(this.key);
   }
 
   getRoomUpdateObject(): updateRoomData {
@@ -31,6 +34,8 @@ export default class Room {
     }
     socket.emit(roomFromServerEvents.youConnectedTo, joinObject)
     this.sendUpdateRoom();
+    
+    this.roomScene.newUserConnect(socket);
 
     socket.on("disconnect", () => {
       socket.leave(this._key);

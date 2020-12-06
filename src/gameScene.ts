@@ -1,9 +1,12 @@
 import { userInputEvents } from "./interfaces/interfaces";
-import DudeServer from "./dudeServer";
+import DudeServer from "./dude/dudeServer";
 import GameObject from "./gameObject";
-import PlatformServer from "./PlatformServer";
+import PlatformServer from "./platforms/PlatformServer";
 import UserInputServer from "./userInputServer";
 import GameServer from "./GameServer";
+import DudeManager from "./dude/dudeManager";
+import PlatformManager from "./platforms/platformManager";
+import { gameSceneFromClient } from "./interfaces/gameSceneInterfaces";
 
 export class GameScene extends Phaser.Scene {
   io: SocketIO.Server;
@@ -14,6 +17,8 @@ export class GameScene extends Phaser.Scene {
   worldWidth = 4000;
   private gameStarted = false;
   private key: string;
+  dudeManager: DudeManager;
+  platformManager: PlatformManager;
 
   init(params: { io: SocketIO.Server; key: string }) {
     this.io = params.io;
@@ -21,6 +26,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
+    console.log("gameScene started " + this.key);
     const platforms = this.physics.add.group();
     const dudesGroup = this.physics.add.group();
 
@@ -43,57 +49,51 @@ export class GameScene extends Phaser.Scene {
       }
     );
 
-    DudeServer.init(this.io, dudesGroup, this.worldWidth / 2);
-    PlatformServer.init(this.io, platforms);
+    this.platformManager = new PlatformManager(this.io, platforms)
 
-    const connected = this.io.in(this.key).connected;
-    for (const key in connected) {
-      if (Object.prototype.hasOwnProperty.call(connected, key)) {
-        const socket = connected[key];
-        console.log("new connection");
-
-        let uis = new UserInputServer(socket, this);
-
-        let dude: DudeServer;
-
-        socket.on("init", () => {
-          dude = DudeServer.add(socket);
-        });
-
-        socket.on("disconnect", (reason) => {
-          if (dude) {
-            let removeId = dude.id;
-            DudeServer.dudes.remove(dude, true, true);
-            socket.broadcast.emit(userInputEvents.remove, { id: removeId });
-          }
-          if (uis) {
-            uis.remove();
-          }
-        });
-      }
-    }
+    this.dudeManager = new DudeManager(this.io, dudesGroup, this.worldWidth / 2, this.platformManager, () => this.gameStop);
+    // PlatformServer.init(this.io, platforms);
   }
 
   update(time: number, delta: number): void {
     if (this.gameStarted) {
-      DudeServer.update(delta);
+      this.dudeManager.update(delta);
     }
   }
 
   restartGame() {
     this.physics.resume();
     this.io.emit(userInputEvents.restartGame);
-    PlatformServer.clear();
+    this.platformManager.clear();
     this.gameStarted = true;
-    PlatformServer.gameStarted = true;
-    DudeServer.startGame();
+    this.platformManager.gameStarted = true;
+    this.dudeManager.startGame();
   }
 
   gameStop() {
     this.gameStarted = false;
-    PlatformServer.clear();
-    PlatformServer.gameStarted = false;
+    this.platformManager.clear();
+    this.platformManager.gameStarted = false;
     UserInputServer.setAllToNotReady();
-    DudeServer.gameEnd();
+    this.dudeManager.gameEnd();
   }
+
+  newUserConnect(socket: SocketIO.Socket) {
+    let dude: DudeServer;
+    let uis = new UserInputServer(socket, this, this.platformManager);
+    socket.on(gameSceneFromClient.sceneReady, () => {
+      dude = this.dudeManager.add(socket);
+    })
+    socket.on("disconnect", (reason) => {
+      if (dude) {
+        let removeId = dude.id;
+        this.dudeManager.dudes.remove(dude, true, true);
+        socket.broadcast.emit(userInputEvents.remove, { id: removeId });
+      }
+      if (uis) {
+        uis.remove();
+      }
+    });
+  }
+
 }

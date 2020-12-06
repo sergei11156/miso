@@ -13,11 +13,9 @@ export default class RoomsScene extends Phaser.Scene {
   private rooms: { [key: string]: Room } = {};
   private lastObjectYPositions: number;
   private textSpawnPositionX: number;
-  constructor() {
-    super({
-      key: "roomsScene",
-    });
-  }
+  isRoomsEventsAreWork: boolean = true;
+
+  
   init(params: { io: SocketIOClient.Socket }) {
     this.io = params.io;
     this.lastObjectYPositions = this.cameras.main.centerY;
@@ -35,12 +33,14 @@ export default class RoomsScene extends Phaser.Scene {
 
     this.io.on(roomFromServerEvents.youConnectedTo, (params: joinRoom) => {
       console.log("EEEEEEEE IM JOINED TO " + params.key);
-      this.scene.add("GameScene", GameScene, true)
-      this.scene.remove("roomsScene")
+      this.openGameScene();
     })
   }
 
   updateRoom(params: updateRoomData) {
+    if (!this.isRoomsEventsAreWork) {
+      return;
+    }
     if (params.key in this.rooms) {
       const room = this.rooms[params.key];
       room.newData(params);
@@ -67,5 +67,11 @@ export default class RoomsScene extends Phaser.Scene {
       key,
     };
     this.io.emit(roomFromClientEvents.join, joinParams);
+  }
+
+  openGameScene() {
+    this.isRoomsEventsAreWork = false;
+    this.scene.add("gameScene", GameScene, true, {io: this.io})
+    this.scene.remove("roomsScene")
   }
 }

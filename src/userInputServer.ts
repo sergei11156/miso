@@ -4,21 +4,24 @@ import {
   userInputEvents,
 } from "./interfaces/interfaces";
 import { GameScene } from "./gameScene";
-import PlatformServer from "./PlatformServer";
+import PlatformServer from "./platforms/PlatformServer";
+import PlatformManager from "./platforms/platformManager";
 
 export default class UserInputServer {
   static userInputs: Set<UserInputServer> = new Set();
   ready = false;
+  platformManager: PlatformManager;
 
-  constructor(socket: SocketIO.Socket, scene: GameScene) {
+  constructor(socket: SocketIO.Socket, scene: GameScene, platformManager: PlatformManager) {
+    this.platformManager = platformManager;
     socket.on(userInputEvents.dragStart, (params: PlatformDragStartOrEnd) => {
-      PlatformServer.dragStart(params, socket);
+      this.platformManager.dragStart(params, socket);
     });
     socket.on(userInputEvents.dragEnd, (params: PlatformDragStartOrEnd) => {
-      PlatformServer.dragEnd(params, socket);
+      this.platformManager.dragEnd(params, socket);
     });
     socket.on(userInputEvents.dragging, (params: PlatformDragging) => {
-      PlatformServer.dragging(params, socket);
+      this.platformManager.dragging(params, socket);
     });
     socket.on(userInputEvents.ready, () => {
       this.ready = true;

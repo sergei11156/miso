@@ -10,21 +10,38 @@ import { MiscoGame } from "./client";
 import Dude from "./Dude";
 import GameObject from "./gameObject";
 import Platform from "./Platform";
+import { createDude, dudeFromServerEvents } from "./interfaces/dudeInterfaces";
+import { gameSceneFromClient } from "./interfaces/gameSceneInterfaces";
+import {
+  platformCreate,
+  platformEventsFromServer,
+} from "./interfaces/platformInterfaces";
 
 export class GameScene extends Phaser.Scene {
-  // player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  platforms: Phaser.Physics.Arcade.Group;
-  // platformTimer: number;
   private cameraFollow?: GameObject;
   private gameObjects: GameObject[] = [];
-  private _io: SocketIOClient.Socket;
+  private io: SocketIOClient.Socket;
   statusText: Phaser.GameObjects.Text;
   youDieText: Phaser.GameObjects.Text;
 
-  constructor() {
-    super({
-      key: "GameScene",
+  init(params: { io: SocketIOClient.Socket }) {
+    this.io = params.io;
+    this.io.on(dudeFromServerEvents.createDude, (params: createDude) => {
+      const dude = new Dude(this, params);
+      if (params.cameraFollow) {
+        this.cameraFollow = dude;
+        this.cameraStartFollow();
+      }
+      this.gameObjects.push(dude);
     });
+
+    this.io.on(
+      platformEventsFromServer.createPlatform,
+      (params: platformCreate) => {
+        const gameObject = Platform.add(this, params);
+        this.gameObjects.push(gameObject);
+      }
+    );
   }
   preload(): void {
     this.load.spritesheet("dude", "assets/dude.png", {
@@ -36,37 +53,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
-    this._io = (this.game as MiscoGame).io;
-    Platform.init(this._io);
+    console.log("create complict");
 
-    this._io.on("create", (params: gameCreateObject) => {
-      console.log(params);
+    Platform.init(this.io);
 
-      let gameObject;
-      switch (params.key) {
-        case "dude":
-          gameObject = new Dude(this, params);
-          break;
-        case "ground":
-          gameObject = Platform.add(this, params);
-          break;
-        default:
-          gameObject = new GameObject(this, params);
-          break;
-      }
 
-      // console.log("create " + gameObject.id + " key " + params.key + " cmrf " + params.cameraFollow);
-
-      if (params.cameraFollow) {
-        this.cameraFollow = gameObject;
-        this.cameraStartFollow();
-      }
-
-      this.gameObjects.push(gameObject);
-      // console.log(this.gameObjects);
-    });
-
-    this._io.on(userInputEvents.update, (params: gameUpdateObject) => {
+    this.io.on(userInputEvents.update, (params: gameUpdateObject) => {
       // console.log("update " + params.id);
       try {
         let gameObject = this.getGameObject(params.id);
@@ -77,11 +69,11 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    this._io.on(userInputEvents.restartGame, () => {
+    this.io.on(userInputEvents.restartGame, () => {
       this.restartGame();
     });
 
-    this._io.on(userInputEvents.youDie, (params: youDie) => {
+    this.io.on(userInputEvents.youDie, (params: youDie) => {
       this.youDieText = this.add.text(
         this.cameras.main.width / 2,
         this.cameras.main.height / 2,
@@ -98,9 +90,9 @@ export class GameScene extends Phaser.Scene {
       console.log("IM DIE");
       Platform.imDead = true;
     });
-    this._io.on(userInputEvents.win, () => {
+    this.io.on(userInputEvents.win, () => {
       console.log("I WIN");
-      
+
       this.youDieText = this.add.text(
         this.cameras.main.width / 2,
         this.cameras.main.height / 2,
@@ -109,10 +101,10 @@ export class GameScene extends Phaser.Scene {
       this.youDieText.scrollFactorX = 0;
       this.youDieText.scrollFactorY = 0;
     });
-    this._io.on(userInputEvents.remove, (params: die) => {
+    this.io.on(userInputEvents.remove, (params: die) => {
       console.log(params);
     });
-    this._io.on(userInputEvents.remove, (params: { id: number }) => {
+    this.io.on(userInputEvents.remove, (params: { id: number }) => {
       this.getGameObject(params.id).destroy();
     });
 
@@ -133,9 +125,9 @@ export class GameScene extends Phaser.Scene {
     this.statusText.setInteractive();
     this.statusText.on("pointerdown", () => {
       this.statusText.text = "СТАТУС: ГОТОВ";
-      this._io.emit(userInputEvents.ready);
+      this.io.emit(userInputEvents.ready);
     });
-    this._io.emit(userInputEvents.init);
+    this.io.emit(gameSceneFromClient.sceneReady);
   }
   update(time: number, delta: number): void {}
 

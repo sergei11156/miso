@@ -28,10 +28,13 @@ export default class GameServer extends Phaser.Game {
   constructor(io: SocketIO.Server) {
     super(config);
     this.io = io;
-    const roomManager = new RoomManager(io, (key) => this.createRoom(key));
+    this.events.on("ready", () => {
+      const roomManager = new RoomManager(io, (key) => {return this.createRoom(key)});
+    })
   }
 
   createRoom(key: string) {
-    this.scene.add(key, GameScene, true, { io: this.io, key });
+    const scene = this.scene.add(key, GameScene, true, { io: this.io, key }) as GameScene;
+    return scene;
   }
 }

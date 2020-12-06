@@ -1,20 +1,18 @@
-import {
-  PlatformDragging,
-  PlatformDragStartOrEnd,
-  userInputEvents,
-} from "./interfaces/interfaces";
-import DudeServer from "./dudeServer";
-import GameObject from "./gameObject";
+import { PlatformDragging, PlatformDragStartOrEnd, userInputEvents } from "../interfaces/interfaces";
+import DudeServer from "../dude/dudeServer";
+import PlatformServer from "./PlatformServer";
+import { platformCreate, platformEventsFromServer } from "../interfaces/platformInterfaces";
+import { CreateContextOptions } from "vm";
 
-export default class PlatformServer extends GameObject {
-  static platforms: Phaser.Physics.Arcade.Group;
-  static platformTimer: number = 0;
-  static io: SocketIO.Server;
-  static yOffsetOfDude = 200;
-  dragging = false;
-  static gameStarted: boolean = false;
+export default class PlatformManager {
+  platforms: Phaser.Physics.Arcade.Group;
+  platformTimer: number = 0;
+  io: SocketIO.Server;
+  yOffsetOfDude = 200;
 
-  static update(delta: number, dudes: DudeServer[]) {
+  gameStarted: boolean = false;
+
+  update(delta: number, dudes: DudeServer[]) {
     this.platformTimer += delta;
     if (this.platformTimer > 1000) {
       this.platformTimer = 0;
@@ -23,16 +21,11 @@ export default class PlatformServer extends GameObject {
       }
     }
   }
-
-  constructor(x: number, y: number) {
-    super(PlatformServer.platforms.scene, "ground", x, y);
-  }
-
-  static init(io: SocketIO.Server, platforms: Phaser.Physics.Arcade.Group) {
+  constructor(io: SocketIO.Server, platforms: Phaser.Physics.Arcade.Group) {
     this.io = io;
     this.platforms = platforms;
   }
-  static getPlatformServer(id: number) {
+  getPlatformServer(id: number) {
     let platforms = this.platforms.children.getArray() as PlatformServer[];
     for (const platform of platforms) {
       if (platform.id == id) {
@@ -42,26 +35,27 @@ export default class PlatformServer extends GameObject {
     throw new Error(`platform ${id} not found`);
   }
 
-  static spawnPlatform(dude: DudeServer) {
+  spawnPlatform(dude: DudeServer) {
     let playerBottomCenter = dude.getBottomCenter();
     const yOffset = this.yOffsetOfDude / 2;
     let platformX =
       playerBottomCenter.x - Phaser.Math.Between(-yOffset, yOffset);
     let platformY = playerBottomCenter.y + 800;
 
-    let platformServer = new PlatformServer(platformX, platformY);
+    let platformServer = new PlatformServer(this.platforms.scene, platformX, platformY);
 
     this.platforms.add(platformServer);
     platformServer.body.setSize(150, 66);
-    this.io.emit(userInputEvents.create, {
-      key: "ground",
+    
+    const createPlatformParam: platformCreate = {
       id: platformServer.id,
       x: platformX,
       y: platformY,
-    });
+    }
+    this.io.emit(platformEventsFromServer.createPlatform, createPlatformParam);
   }
 
-  static dragStart(params: PlatformDragStartOrEnd, socket: SocketIO.Socket) {
+  dragStart(params: PlatformDragStartOrEnd, socket: SocketIO.Socket) {
     if (!this.gameStarted) return;
 
     try {
@@ -76,7 +70,7 @@ export default class PlatformServer extends GameObject {
     }
   }
 
-  static dragEnd(params: PlatformDragStartOrEnd, socket: SocketIO.Socket) {
+  dragEnd(params: PlatformDragStartOrEnd, socket: SocketIO.Socket) {
     if (!this.gameStarted) return;
     try {
       let platformServer = this.getPlatformServer(params.id);
@@ -90,7 +84,7 @@ export default class PlatformServer extends GameObject {
     }
   }
 
-  static dragging(params: PlatformDragging, socket: SocketIO.Socket) {
+  dragging(params: PlatformDragging, socket: SocketIO.Socket) {
     if (!this.gameStarted) return;
     try {
       let platformServer = this.getPlatformServer(params.id);
@@ -103,12 +97,7 @@ export default class PlatformServer extends GameObject {
       console.log(error);
     }
   }
-
-  dragTo(params: PlatformDragging) {
-    this.setPosition(params.x, params.y);
-  }
-
-  static clear() {
+  clear() {
     this.platforms.clear(true, true);
     this.platformTimer = 0;
   }

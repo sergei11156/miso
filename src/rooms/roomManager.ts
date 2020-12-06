@@ -1,3 +1,4 @@
+import { GameScene } from "../gameScene";
 import { clientEvents } from "../interfaces/interfaces";
 import {
   joinRoom,
@@ -10,11 +11,11 @@ export default class RoomManager {
   private rooms: Room[] = [];
   private io: SocketIO.Server;
 
-  constructor(io: SocketIO.Server, createRoom: (key: string) => void) {
+  constructor(io: SocketIO.Server, createRoom: (key: string) => GameScene) {
     this.io = io;
-    this.createNewRoom();
-    this.createNewRoom();
-    this.createNewRoom();
+    this.createNewRoom(createRoom);
+    this.createNewRoom(createRoom);
+    this.createNewRoom(createRoom);
 
     io.on("connection", (socket: SocketIO.Socket) => {
       socket.join("wait");
@@ -37,8 +38,8 @@ export default class RoomManager {
     });
   }
 
-  createNewRoom() {
-    const room = new Room(this.io);
+  createNewRoom(createRoom: (key: string) => GameScene) {
+    const room = new Room(this.io, createRoom);
     this.rooms.push(room);
   }
 
