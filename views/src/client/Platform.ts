@@ -20,8 +20,11 @@ export default class Platform extends GameObject {
   static platforms: Platform[] = [];
   static imDead: boolean = false;
 
+  static platformGroup: Phaser.Physics.Arcade.Group;
+
   static add(scene: GameScene, params: platformCreate): any {
-    let platform = new Platform(scene, params, this.io);
+    this.platformGroup = scene.physics.add.group();
+    let platform = new Platform(scene, params, this.io, this.platformGroup);
     this.platforms.push(platform);
     return platform;
   }
@@ -30,7 +33,7 @@ export default class Platform extends GameObject {
     this.io = _io;
     this.io.on(userInputEvents.dragStart, (params: PlatformDragStartOrEnd) => {
       if (Platform.imDead) {
-        return
+        return;
       }
       try {
         let platform = this.getPlatform(params.id);
@@ -46,7 +49,7 @@ export default class Platform extends GameObject {
 
     this.io.on(userInputEvents.dragEnd, (params: PlatformDragStartOrEnd) => {
       if (Platform.imDead) {
-        return
+        return;
       }
       try {
         let platform = this.getPlatform(params.id);
@@ -62,7 +65,7 @@ export default class Platform extends GameObject {
 
     this.io.on(userInputEvents.dragging, (params: PlatformDragging) => {
       if (Platform.imDead) {
-        return
+        return;
       }
       try {
         let platform = this.getPlatform(params.id);
@@ -85,9 +88,10 @@ export default class Platform extends GameObject {
   constructor(
     scene: GameScene,
     params: platformCreate,
-    io: SocketIOClient.Socket
+    io: SocketIOClient.Socket,
+    group: Phaser.Physics.Arcade.Group
   ) {
-    super(scene, params.id, params.x, params.y, "ground");
+    super(scene, params.id, params.x, params.y, "ground", group);
     this.sprite.setInteractive();
     scene.input.setDraggable(this.sprite);
 
@@ -104,22 +108,17 @@ export default class Platform extends GameObject {
       console.log(dragStart);
     });
 
-    this.sprite.on(
-      "drag",
-      (pointer: any, dragX: number, dragY: number) => {
-        // console.log("drag event x: " + dragX + " drag y: " + dragY);
-        
-        this.dragTo(dragX, dragY);
+    this.sprite.on("drag", (pointer: any, dragX: number, dragY: number) => {
+      this.dragTo(dragX, dragY);
 
-        const dragNewPos: PlatformDragging = {
-          id: this.id,
-          x: this.sprite.x,
-          y: this.sprite.y,
-        };
+      const dragNewPos: PlatformDragging = {
+        id: this.id,
+        x: this.sprite.x,
+        y: this.sprite.y,
+      };
 
-        io.emit(userInputEvents.dragging, dragNewPos);
-      }
-    );
+      io.emit(userInputEvents.dragging, dragNewPos);
+    });
 
     this.sprite.on("dragend", () => {
       this.stopDragging();

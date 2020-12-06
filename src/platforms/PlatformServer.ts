@@ -3,7 +3,6 @@ import {
   PlatformDragStartOrEnd,
   userInputEvents,
 } from "../interfaces/interfaces";
-import DudeServer from "../dude/dudeServer";
 import GameObject from "../gameObject";
 
 export default class PlatformServer extends GameObject {

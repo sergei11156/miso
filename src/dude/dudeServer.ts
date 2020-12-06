@@ -56,20 +56,22 @@ export default class DudeServer extends GameObject {
   }
 
   getCreateParams() {
+    const center = this.getCenter();
     let params: createDude = {
       id: this.id,
-      x: this.body.x,
-      y: this.body.y,
+      x: center.x,
+      y: center.y,
     };
     return params;
   }
 
   updateDude() {
     if (this.active) {
+      const center = this.getCenter();
       const params: gameUpdateObject = {
         id: this.id,
-        x: this.body.x,
-        y: this.body.y,
+        x: center.x,
+        y: center.y,
       };
       this.connection.send.update(params);
     }
