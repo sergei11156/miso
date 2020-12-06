@@ -6,20 +6,34 @@ import {
   userInputEvents,
   youDie,
 } from "../interfaces/interfaces";
-import PlatformServer from "../platforms/PlatformServer";
 import "phaser";
-import { GameScene } from "../gameScene";
 import DudeManager from "./dudeManager";
 import { createDude, dudeFromServerEvents } from "../interfaces/dudeInterfaces";
+import userConnection from "../connection/userConnection";
 
 export default class DudeServer extends GameObject {
-  
-  socket: SocketIO.Socket;
-
   private _xAxis: number;
   dudeManager: DudeManager;
+  connection: userConnection;
 
-  
+  constructor(
+    connection: userConnection,
+    xAxis: number,
+    dudeManager: DudeManager
+  ) {
+    super(
+      dudeManager.dudes.scene,
+      "dude",
+      xAxis,
+      dudeManager.startPlayerYPosition
+    );
+    this._xAxis = xAxis;
+    this.connection = connection;
+    this.dudeManager = dudeManager;
+    dudeManager.dudes.add(this, true);
+    this.body.setSize(32, 48);
+    this.setCollideWorldBounds(false);
+  }
 
   gameStart(xAxisOffset: number) {
     this.setActive(true);
@@ -32,13 +46,13 @@ export default class DudeServer extends GameObject {
   sendCreateEvent() {
     let params = this.getCreateParams();
     console.log(params);
-    
+
     params.cameraFollow = true;
-    this.socket.emit(dudeFromServerEvents.createDude, params);
+    this.connection.send.createDude(params);
     console.log("create emitted 11");
-    
+
     params.cameraFollow = false;
-    this.socket.broadcast.emit(dudeFromServerEvents.createDude, params);
+    this.connection.send.createDude(params, true);
   }
 
   getCreateParams() {
@@ -50,7 +64,6 @@ export default class DudeServer extends GameObject {
     return params;
   }
 
-
   updateDude() {
     if (this.active) {
       const params: gameUpdateObject = {
@@ -58,27 +71,8 @@ export default class DudeServer extends GameObject {
         x: this.body.x,
         y: this.body.y,
       };
-      console.log(params);
-      
-      this.dudeManager.io.emit(userInputEvents.update, params);
+      this.connection.send.update(params);
     }
-  }
-
-
-
-  constructor(socket: SocketIO.Socket, xAxis: number, dudeManager:DudeManager) {
-    super(
-      dudeManager.dudes.scene,
-      "dude",
-      xAxis,
-      dudeManager.startPlayerYPosition
-    );
-    this._xAxis = xAxis;
-    this.socket = socket;
-    this.dudeManager = dudeManager;
-    dudeManager.dudes.add(this, true);
-    this.body.setSize(32, 48);
-    this.setCollideWorldBounds(false);
   }
 
   youDied() {
@@ -89,22 +83,22 @@ export default class DudeServer extends GameObject {
 
     // const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
 
-    const youDie: youDie = {
-      id: oldId,
-    };
+    // const youDie: youDie = {
+    //   id: oldId,
+    // };
     // if (newId) {
     //   youDie.newFollowId = newId.id;
     // }
-    const dieData: die = { id: oldId };
-    this.socket.emit(userInputEvents.youDie, youDie);
-    this.socket.broadcast.emit(userInputEvents.die, dieData);
+    // const dieData: die = { id: oldId };
+    // this.socket.emit(userInputEvents.youDie, youDie);
+    // this.socket.broadcast.emit(userInputEvents.die, dieData);
+
+    this.connection.send.die(oldId);
     this.dudeManager.onSomeoneDie();
   }
 
-
   youWin() {
-    this.socket.emit(userInputEvents.win);
+    this.connection.send.win();
+    // this.socket.emit(userInputEvents.win);
   }
-
-
 }

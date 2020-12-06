@@ -1,5 +1,6 @@
+import userConnection from "../connection/userConnection";
+import { dudeFromServerEvents } from "../interfaces/dudeInterfaces";
 import PlatformManager from "../platforms/platformManager";
-import PlatformServer from "../platforms/PlatformServer";
 import DudeServer from "./dudeServer";
 
 export default class DudeManager {
@@ -8,20 +9,19 @@ export default class DudeManager {
   dudes: Phaser.Physics.Arcade.Group;
   startPlayerYPosition = 200;
   worldCenterX: number;
-  io: SocketIO.Server;
   gameStop: () => void;
   platformManager: PlatformManager;
 
-  add(socket: SocketIO.Socket) {
-    const newDude = new DudeServer(socket, this.getNewPositionForDude(), this);
+  add(connection: userConnection) {
+    const newDude = new DudeServer(connection, this.getNewPositionForDude(), this);
     newDude.sendCreateEvent();
 
     this.dudes.children.each((dude: DudeServer) => {
       if (dude.id == newDude.id) {
         return;
       }
-      // let params = dude.getCreateParams();
-      // socket.emit(userInputEvents.create, params);
+      let params = dude.getCreateParams();
+      connection.send.createDude(params);
     });
     return newDude;
   }
@@ -42,13 +42,11 @@ export default class DudeManager {
   }
 
   constructor(
-    io: SocketIO.Server,
     group: Phaser.Physics.Arcade.Group,
     worldCenterX: number,
     platformManager: PlatformManager,
     gameStop: () => void
   ) {
-    this.io = io;
     this.dudes = group;
     this.worldCenterX = worldCenterX;
     this.platformManager = platformManager;
@@ -101,6 +99,8 @@ export default class DudeManager {
         count++;
       }
     });
+    console.log("count Alive = " + count);
+    
     return count;
   }
 

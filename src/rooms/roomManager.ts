@@ -14,8 +14,8 @@ export default class RoomManager {
   constructor(io: SocketIO.Server, createRoom: (key: string) => GameScene) {
     this.io = io;
     this.createNewRoom(createRoom);
-    this.createNewRoom(createRoom);
-    this.createNewRoom(createRoom);
+    // this.createNewRoom(createRoom);
+    // this.createNewRoom(createRoom);
 
     io.on("connection", (socket: SocketIO.Socket) => {
       socket.join("wait");

@@ -1,5 +1,5 @@
 export enum roomFromServerEvents {
-  update = "update",
+  update = "updateRoom",
   youConnectedTo = "youConnectedTo",
 }
 export enum roomFromClientEvents {
