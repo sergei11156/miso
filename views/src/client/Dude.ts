@@ -10,19 +10,23 @@ export default class Dude extends GameObject {
   myName: Phaser.GameObjects.Text;
   // closezone: Phaser.Physics.Arcade.Sprite;
   // private closezone:
-  constructor(scene: GameScene, params: createDude, redzone: Phaser.Physics.Arcade.Group) {
+  constructor(
+    scene: GameScene,
+    params: createDude,
+    redzone: Phaser.Physics.Arcade.Group
+  ) {
     super(scene, params.id, params.x, params.y, "dude");
     const graphics = scene.add.graphics();
     this.graphics = graphics;
     this.graphics.alpha = 0;
-    this.circle = new Phaser.Geom.Circle(params.x, params.y, 150)
-    this.myName = scene.add.text(params.x, params.y, params.name)
+    this.circle = new Phaser.Geom.Circle(params.x, params.y, 150);
+    this.myName = scene.add.text(params.x, params.y, params.name);
     console.log(params.name);
-    
+
     if (params.cameraFollow) {
       this.myName.setColor("#00FF08");
     } else {
-      this.myName.setColor("#E43434")
+      this.myName.setColor("#E43434");
     }
     this.updateTextPosition();
     Dude.dudes.add(this);
@@ -30,8 +34,8 @@ export default class Dude extends GameObject {
 
   updateTextPosition() {
     const topCentre = this.sprite.getTopCenter();
-    const width = this.myName.width
-    this.myName.setPosition(topCentre.x - width/2, topCentre.y - 20)
+    const width = this.myName.width;
+    this.myName.setPosition(topCentre.x - width / 2, topCentre.y - 20);
   }
 
   updatePos(x: number, y: number) {
@@ -41,7 +45,7 @@ export default class Dude extends GameObject {
   updateAnimations() {
     this.sprite.anims.play("always", true);
     if (this.graphics.alpha > 0) {
-      this.graphics.alpha -= .05
+      this.graphics.alpha -= 0.05;
       this.updateGraphicsPosition();
     }
     this.updateTextPosition();
@@ -56,14 +60,14 @@ export default class Dude extends GameObject {
   updateGraphicsPosition() {
     const centre = this.sprite.getCenter();
     this.graphics.clear();
-    this.graphics.fillStyle(0xFF0000, 1)
-    this.circle.setPosition(centre.x, centre.y)
-    this.graphics.fillCircleShape(this.circle)
+    this.graphics.fillStyle(0xff0000, 1);
+    this.circle.setPosition(centre.x, centre.y);
+    this.graphics.fillCircleShape(this.circle);
     // this.graphics.fillCircle(centre.x, centre.y, 150)
   }
 
   showCloseZone() {
-    this.graphics.alpha = .5;
+    this.graphics.alpha = 0.5;
     this.updateGraphicsPosition();
   }
 
@@ -79,7 +83,7 @@ export default class Dude extends GameObject {
       const centre = dude.sprite.getCenter();
       const distance = Phaser.Math.Distance.BetweenPoints(pointer, centre);
       console.log(distance);
-      
+
       if (distance < 150) {
         console.log("show close fucking zone");
         dude.showCloseZone();
@@ -87,5 +91,8 @@ export default class Dude extends GameObject {
       }
     }
     return isIt;
+  }
+  static reset() {
+    this.dudes = new Set();
   }
 }

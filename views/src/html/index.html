@@ -8,23 +8,89 @@
       body {
         margin: 0;
       }
-      .nameInput {
+      .startScreenContainer {
         position: absolute;
         width: 100vw;
         height: 100vh;
         justify-content: center;
         display: flex;
         align-items: center;
+        flex-direction: column;
+        background-color: #5dade2;
       }
       #inputYourName {
         font-size: 20px;
+        width: 100%;
         margin-bottom: 50px;
+        height: 30px;
+        max-width: 500px;
+      }
+      #playButton {
+        background-color: #0ab30a;
+        width: 100%;
+        height: 50px;
+        font-size: 2em;
+        color: white;
+        max-width: 500px;
+        outline: none;
+        border: none;
+      }
+      .startScreenContainer form {
+        width: 60%;
+        max-width: 500px;
+      }
+      .gameUi {
+        display: none;
+        position: absolute;
+        background-color: #00000038;
+        padding: 10px;
+      }
+      .users {
+        margin: 5px 0;
+        list-style: decimal;
+        padding-left: 20px;
+      }
+      .quitRoomButton {
+        text-transform: uppercase;
+        background-color: #c80707;
+        color: white;
+        padding: 5px;
+        outline: none;
+        border: none;
+      }
+      .readyButton {
+        border: none;
+        padding: 5px;
+      }
+      .readyButton.ready {
+        background-color: #41e320;
+      }
+      .readyButton.notready {
+        background-color: #c80707;
+        color: white;
       }
     </style>
   </head>
   <body>
-    <div class="nameInput">
-      <input id="inputYourName" type="text" placeholder="Введите имя" />
+    <div class="startScreenContainer">
+      <form action="javascript:void(0);">
+        <input
+          id="inputYourName"
+          type="text"
+          placeholder="Введите имя"
+          required
+        />
+
+        <input id="playButton" type="submit" value="Играть!" />
+      </form>
+    </div>
+    <div class="gameUi">
+      <div class="roomName"></div>
+      <ul class="users"></ul>
+      <div class="gameControlButtons">
+        <button class="quitRoomButton">Выйти из комнаты</button>
+        <button class="readyButton"></button>
+      </div>
     </div>
     <script src="bundle.js"></script>
   </body>

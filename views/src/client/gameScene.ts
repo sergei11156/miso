@@ -17,6 +17,7 @@ import {
   platformEventsFromServer,
 } from "./interfaces/platformInterfaces";
 import Pointer from "./pointer";
+import RoomsScene from "./rooms/roomsScene";
 
 export class GameScene extends Phaser.Scene {
   private cameraFollow?: GameObject;
@@ -27,19 +28,25 @@ export class GameScene extends Phaser.Scene {
   pointer: Pointer;
   redzones: Phaser.Physics.Arcade.Group;
   platforms: Phaser.Physics.Arcade.Group;
-
-  init(params: { io: SocketIOClient.Socket }) {
+  gameUI: HTMLDivElement;
+  roomNameElement: HTMLDivElement;
+  usersUlElement: HTMLUListElement;
+  readyButton: HTMLButtonElement;
+  quitRoomButton: NodeListOf<HTMLButtonElement>;
+  private ready: boolean = false;
+  init(params: { io: SocketIOClient.Socket; roomName: string }) {
     this.io = params.io;
     this.redzones = this.physics.add.group();
-    this.platforms= this.physics.add.group();
+    this.platforms = this.physics.add.group();
     this.io.on(dudeFromServerEvents.createDude, (params: createDude) => {
-      
       const dude = new Dude(this, params, this.redzones);
       if (params.cameraFollow) {
         this.cameraFollow = dude;
         this.cameraStartFollow();
       }
       this.gameObjects.push(dude);
+
+      this.createUsersList();
     });
 
     this.io.on(
@@ -50,7 +57,55 @@ export class GameScene extends Phaser.Scene {
       }
     );
 
-    
+    this.gameUI = document.querySelector(".gameUi");
+    this.gameUI.style.display = "block";
+    this.roomNameElement = document.querySelector(".roomName");
+    this.usersUlElement = document.querySelector(".users");
+    this.readyButton = document.querySelector(".readyButton");
+    this.quitRoomButton = document.querySelectorAll(".quitRoomButton");
+
+    this.roomNameElement.textContent = "Комната: " + params.roomName;
+    this.setButtonReadyState(false);
+    this.readyButton.addEventListener("click", () => {
+      if (!this.ready) {
+        this.setButtonReadyState(true);
+        this.io.emit(userInputEvents.ready);
+      } else {
+        this.setButtonReadyState(false);
+        this.io.emit(gameSceneFromClient.imNotReady);
+      }
+    });
+
+    this.quitRoomButton.forEach((el) => {
+      el.addEventListener("click", () => {
+        this.io.disconnect();
+        Dude.reset();
+        Platform.reset();
+        this.gameUI.style.display = "none";
+        this.scene.add("roomsScene", RoomsScene, true);
+        this.scene.remove("gameScene");
+      });
+    });
+  }
+  setButtonReadyState(state: boolean) {
+    this.ready = state;
+    if (this.ready) {
+      this.readyButton.textContent = "НЕ ГОТОВ";
+      this.readyButton.classList.remove("ready");
+      this.readyButton.classList.add("notready");
+    } else {
+      this.readyButton.textContent = "ГОТОВ!";
+      this.readyButton.classList.add("ready");
+      this.readyButton.classList.remove("notready");
+    }
+  }
+  createUsersList() {
+    let namesOfDudes = ["player1", "player2"];
+    this.usersUlElement.innerHTML = "";
+    for (const name of namesOfDudes) {
+      let li = document.createElement("li");
+      this.usersUlElement.appendChild(li).textContent = name;
+    }
   }
   preload(): void {
     this.load.spritesheet("dude", "assets/dude.png", {
@@ -105,6 +160,7 @@ export class GameScene extends Phaser.Scene {
       console.log("IM DIE");
       Platform.imDead = true;
     });
+
     this.io.on(userInputEvents.win, () => {
       console.log("I WIN");
 
@@ -116,9 +172,11 @@ export class GameScene extends Phaser.Scene {
       this.youDieText.scrollFactorX = 0;
       this.youDieText.scrollFactorY = 0;
     });
+
     this.io.on(userInputEvents.remove, (params: die) => {
       console.log(params);
     });
+
     this.io.on(userInputEvents.remove, (params: { id: number }) => {
       this.getGameObject(params.id).destroy();
     });
@@ -133,15 +191,15 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, 20000, 2e6);
     this.physics.world.setBounds(0, 0, 20000, 2e6);
 
-    this.statusText = this.add.text(20, 20, "СТАТУС: НЕ ГОТОВ");
+    // this.statusText = this.add.text(20, 20, "СТАТУС: НЕ ГОТОВ");
 
-    this.statusText.scrollFactorX = 0;
-    this.statusText.scrollFactorY = 0;
-    this.statusText.setInteractive();
-    this.statusText.on("pointerdown", () => {
-      this.statusText.text = "СТАТУС: ГОТОВ";
-      this.io.emit(userInputEvents.ready);
-    });
+    // this.statusText.scrollFactorX = 0;
+    // this.statusText.scrollFactorY = 0;
+    // this.statusText.setInteractive();
+    // this.statusText.on("pointerdown", () => {
+    // this.statusText.text = "СТАТУС: ГОТОВ";
+    // this.io.emit(userInputEvents.ready);
+    // });
     this.io.emit(gameSceneFromClient.sceneReady);
   }
   update(time: number, delta: number): void {
@@ -152,7 +210,8 @@ export class GameScene extends Phaser.Scene {
 
   restartGame() {
     console.log("restartGAME");
-    this.statusText.text = "СТАТУС: НЕ ГОТОВ";
+    // this.statusText.text = "СТАТУС: НЕ ГОТОВ";
+    this.setButtonReadyState(false);
 
     if (this.youDieText) {
       this.youDieText.destroy();

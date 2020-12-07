@@ -8,6 +8,8 @@ import {
 } from "../interfaces/roomInterfaces";
 import { clientEvents } from "../interfaces/interfaces";
 import { GameScene } from "../gameScene";
+import socket_io from "socket.io-client";
+
 export default class RoomsScene extends Phaser.Scene {
   private io: SocketIOClient.Socket;
   private rooms: { [key: string]: Room } = {};
@@ -16,13 +18,32 @@ export default class RoomsScene extends Phaser.Scene {
   isRoomsEventsAreWork: boolean = true;
   inputNameContainer: HTMLDivElement;
   inputName: HTMLInputElement;
+  submitButton: HTMLFormElement;
+  roomName: string;
 
-  init(params: { io: SocketIOClient.Socket }) {
-    this.io = params.io;
+  init() {
+    this.io = socket_io();
     this.lastObjectYPositions = this.cameras.main.centerY;
     this.textSpawnPositionX = this.cameras.main.centerX;
-    this.inputNameContainer = document.querySelector(".nameInput");
+    this.submitButton = document.querySelector(".startScreenContainer form");
+    console.log(this.submitButton);
+    this.submitButton.addEventListener("submit", () => {
+      this.joinSomeRoom();
+    })
+    this.inputNameContainer = document.querySelector(".startScreenContainer");
+    this.inputNameContainer.style.display = "flex";
     this.inputName = document.getElementById("inputYourName") as HTMLInputElement;
+  }
+  joinSomeRoom() {
+    for (const key in this.rooms) {
+      if (Object.prototype.hasOwnProperty.call(this.rooms, key)) {
+        const room = this.rooms[key];
+        if (room.isWaiting) {
+          this.joinRoom(room.key)
+          return;
+        }
+      }
+    }
   }
   preload() {}
 
@@ -35,10 +56,9 @@ export default class RoomsScene extends Phaser.Scene {
     this.io.emit(clientEvents.init);
 
     this.io.on(roomFromServerEvents.youConnectedTo, (params: joinRoom) => {
-      console.log("EEEEEEEE IM JOINED TO " + params.key);
+      this.roomName = params.key;
       this.openGameScene();
     });
-
   }
 
   updateRoom(params: updateRoomData) {
@@ -50,9 +70,9 @@ export default class RoomsScene extends Phaser.Scene {
       room.newData(params);
     } else {
       const room = new Room(
-        this,
-        this.textSpawnPositionX,
-        this.lastObjectYPositions,
+        // this,
+        // this.textSpawnPositionX,
+        // this.lastObjectYPositions,
         params.key,
         params.players,
         params.isWaiting,
@@ -60,8 +80,8 @@ export default class RoomsScene extends Phaser.Scene {
       );
       this.rooms[params.key] = room;
 
-      this.add.existing(room);
-      this.lastObjectYPositions += room.height + 20;
+      // this.add.existing(room);
+      // this.lastObjectYPositions += room.height + 20;
     }
   }
 
@@ -78,7 +98,7 @@ export default class RoomsScene extends Phaser.Scene {
   openGameScene() {
     this.isRoomsEventsAreWork = false;
     this.inputNameContainer.style.display = "none";
-    this.scene.add("gameScene", GameScene, true, { io: this.io });
+    this.scene.add("gameScene", GameScene, true, { io: this.io, roomName: this.roomName });
     this.scene.remove("roomsScene");
   }
 }

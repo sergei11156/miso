@@ -8,6 +8,7 @@ import { gameSceneFromClient } from "./interfaces/gameSceneInterfaces";
 import userConnectionManager from "./connection/userConnectionManager";
 
 export class GameScene extends Phaser.Scene {
+
   io: SocketIO.Server;
   startPlayerYPosition = 200;
   static lastObjectId: number = 0;
@@ -24,6 +25,9 @@ export class GameScene extends Phaser.Scene {
   platformManager: PlatformManager;
   userConnectionManager: userConnectionManager;
 
+  private defaultForceGameStartTime = 10000;
+  private forceStartTimer = 0;
+  private forceTimerIsTik = false;
   init(params: { io: SocketIO.Server; key: string }) {
     this.io = params.io;
     this.key = params.key;
@@ -76,6 +80,15 @@ export class GameScene extends Phaser.Scene {
     if (this._gameStarted) {
       this.dudeManager.update(delta);
     }
+
+    if (this.forceTimerIsTik) {
+      this.forceStartTimer+=delta;
+      // this.io.in
+      if (this.forceStartTimer > this.defaultForceGameStartTime) {
+        this.forceGameStartTimerOff();
+        this.restartGame();
+      }
+    }
   }
 
   restartGame() {
@@ -117,5 +130,14 @@ export class GameScene extends Phaser.Scene {
 
   setGameStateCallback(f: (gameStarted: boolean)=>void) {
     this._gameStateCallback = f;
+  }
+
+  forceGameStartTimerOff() {
+    this.forceTimerIsTik = false;
+    this.forceStartTimer = 0;
+  }
+  forceGameStartTimerOn() {
+    this.forceTimerIsTik = true; 
+    this.forceStartTimer = 0;
   }
 }

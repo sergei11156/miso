@@ -13,14 +13,14 @@ export default class userOutput {
 
   createDude(params: createDude, sendToAll = false) {
     if (sendToAll) {
-      this.socket.broadcast.emit(dudeFromServerEvents.createDude, params);
+      this.socket.broadcast.in(this.room).emit(dudeFromServerEvents.createDude, params);
     } else {
       this.socket.emit(dudeFromServerEvents.createDude, params);
     }
   }
 
   update(params: gameUpdateObject) {
-    this.socket.broadcast.emit(userInputEvents.update, params);
+    this.socket.broadcast.in(this.room).emit(userInputEvents.update, params);
     this.socket.emit(userInputEvents.update, params);
   }
 
@@ -31,7 +31,7 @@ export default class userOutput {
       id,
     };
     this.socket.emit(userInputEvents.youDie, youDead);
-    this.socket.broadcast.emit(userInputEvents.die, youDead)
+    this.socket.broadcast.in(this.room).emit(userInputEvents.die, youDead)
   }
 
   win() {
@@ -41,7 +41,7 @@ export default class userOutput {
 
   destroyPlatform(id: number, sendToAllExceptMe = true) {
     if (sendToAllExceptMe) {
-      this.socket.broadcast.emit(platformEventsFromServer.destroyPlatform, { id })
+      this.socket.broadcast.in(this.room).emit(platformEventsFromServer.destroyPlatform, { id })
     }
   }
 }

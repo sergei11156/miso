@@ -17,10 +17,10 @@ export interface draggingPlatform {
 }
 
 export default class Platform extends GameObject {
+
   static io: any;
   static platforms: Platform[] = [];
   static imDead: boolean = false;
-  imNotInteractive = false;
 
   static add(scene: GameScene, params: platformCreate, group: Phaser.Physics.Arcade.Group): any {
     let platform = new Platform(scene, params, this.io);
@@ -97,7 +97,7 @@ export default class Platform extends GameObject {
     scene.input.setDraggable(this.sprite);
 
     this.sprite.on("dragstart", (pointer: Phaser.Input.Pointer) => {
-      if (this.dragging || this.imNotInteractive || Platform.imDead) {
+      if (this.dragging || Platform.imDead) {
         return;
       }
 
@@ -115,7 +115,7 @@ export default class Platform extends GameObject {
     });
 
     this.sprite.on("drag", (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-      if(Platform.imDead || this.imNotInteractive) return;
+      if(Platform.imDead) return;
       if (this.checkIsPointerIsInCloseZone(pointer)) {
         this.whenDraggedToCloseZone();
         return;
@@ -171,5 +171,10 @@ export default class Platform extends GameObject {
       }
     }
     throw new Error("platform not found");
+  } 
+  
+  static reset() {
+    this.platforms = [];
+
   }
 }

@@ -1,3 +1,4 @@
+import { gameSceneFromServer } from "../interfaces/gameSceneInterfaces";
 import { GameScene } from "../gameScene";
 import PlatformManager from "../platforms/platformManager";
 import userConnection from "./userConnection";
@@ -56,4 +57,15 @@ export default class userConnectionManager {
   remove(connection: userConnection) {
     this.connections.delete(connection);
   }
+
+  timerGameStartOn() {
+    this.io.to(this.room).emit(gameSceneFromServer.gameStartTimerOn);
+  }
+  timerGameStartOff() {
+    this.io.to(this.room).emit(gameSceneFromServer.gameStartTimerOff);
+  }
+  timerUpdater(time: number) {
+    this.io.to(this.room).emit(gameSceneFromServer.gameStartTimerUpdate, time)
+  }
+
 }

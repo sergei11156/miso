@@ -1,3 +1,4 @@
+import userConnection from "../connection/userConnection";
 import { GameScene } from "../gameScene";
 import { updateRoomData, youConnectedTo } from "../interfaces/roomInterfaces";
 import { joinRoom } from "../interfaces/roomInterfaces";
@@ -10,7 +11,7 @@ export default class Room {
   }
   private playersCount: number = 0;
   private io: SocketIO.Server;
-  private roomScene: GameScene; 
+  private roomScene: GameScene;
 
   constructor(io: SocketIO.Server, createRoom: (key: string) => GameScene) {
     this._key = this.makeKey(5);
@@ -43,11 +44,12 @@ export default class Room {
     this.sendUpdateRoom();
     
     this.roomScene.newUserConnect(socket, name);
-
+    this.checkIfRoomCanStart();
     socket.on("disconnect", () => {
       socket.leave(this._key);
       this.playersCount--;
       this.sendUpdateRoom();
+      this.checkIfRoomCanStart();
     });
   }
 
@@ -65,5 +67,20 @@ export default class Room {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
+  }
+
+  checkIfRoomCanStart() {
+    if (this.playersCount < 2) return;
+
+    let howManyReadyPlayers = 0;
+    for (const connection of this.roomScene.userConnectionManager.connections) {
+      if (connection.ready) howManyReadyPlayers++;
+    }
+
+    if (this.playersCount/2 < howManyReadyPlayers) {
+      this.roomScene.forceGameStartTimerOn();
+    } else {
+      this.roomScene.forceGameStartTimerOff();
+    }
   }
 }
