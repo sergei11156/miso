@@ -4,6 +4,8 @@ import {
   userInputEvents,
 } from "../interfaces/interfaces";
 import GameObject from "../gameObject";
+import userConnection from "../connection/userConnection";
+import userConnectionManager from "../connection/userConnectionManager";
 
 export default class PlatformServer extends GameObject {
 
@@ -20,4 +22,8 @@ export default class PlatformServer extends GameObject {
   }
 
 
+  destroyPlatform(connection: userConnection) {
+    connection.send.destroyPlatform(this.id);
+    super.destroy();
+  }
 }

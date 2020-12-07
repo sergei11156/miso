@@ -7,7 +7,7 @@ export default class GameObject {
   get id() {
     return this._id;
   }
-  sprite: Phaser.GameObjects.Sprite;
+  sprite: Phaser.Physics.Arcade.Sprite;
 
   constructor(
     scene: GameScene,

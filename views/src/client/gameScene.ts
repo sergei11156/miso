@@ -16,6 +16,7 @@ import {
   platformCreate,
   platformEventsFromServer,
 } from "./interfaces/platformInterfaces";
+import Pointer from "./pointer";
 
 export class GameScene extends Phaser.Scene {
   private cameraFollow?: GameObject;
@@ -23,11 +24,16 @@ export class GameScene extends Phaser.Scene {
   private io: SocketIOClient.Socket;
   statusText: Phaser.GameObjects.Text;
   youDieText: Phaser.GameObjects.Text;
+  pointer: Pointer;
+  redzones: Phaser.Physics.Arcade.Group;
+  platforms: Phaser.Physics.Arcade.Group;
 
   init(params: { io: SocketIOClient.Socket }) {
     this.io = params.io;
+    this.redzones = this.physics.add.group();
+    this.platforms= this.physics.add.group();
     this.io.on(dudeFromServerEvents.createDude, (params: createDude) => {
-      const dude = new Dude(this, params);
+      const dude = new Dude(this, params, this.redzones);
       if (params.cameraFollow) {
         this.cameraFollow = dude;
         this.cameraStartFollow();
@@ -38,10 +44,12 @@ export class GameScene extends Phaser.Scene {
     this.io.on(
       platformEventsFromServer.createPlatform,
       (params: platformCreate) => {
-        const gameObject = Platform.add(this, params);
+        const gameObject = Platform.add(this, params, this.platforms);
         this.gameObjects.push(gameObject);
       }
     );
+
+    
   }
   preload(): void {
     this.load.spritesheet("dude", "assets/dude.png", {
@@ -50,13 +58,19 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.load.image("ground", "assets/platform.png");
+    this.load.image("redzone", "assets/redZone.png");
+    this.load.image("pointer", "assets/cursor.png");
   }
 
   create(): void {
+    // const test = this.physics.add.sprite(2000, 300, "ground")
+    // this.platforms.add(test);
+    // this.pointer = new Pointer(this, this.platforms);
+    // this.input.setDefaultCursor("url(assets/cursor.png), pointer")
     console.log("create complict");
 
     Platform.init(this.io);
-
+    // Platform.add(this, {id: 100, x: 2000, y: 300}, this.platforms)
 
     this.io.on(userInputEvents.update, (params: gameUpdateObject) => {
       // console.log("update " + params.id);
@@ -129,7 +143,11 @@ export class GameScene extends Phaser.Scene {
     });
     this.io.emit(gameSceneFromClient.sceneReady);
   }
-  update(time: number, delta: number): void {}
+  update(time: number, delta: number): void {
+    // console.log(this.input.activePointer);
+    // this.pointer.setPosition(this, this.input.activePointer.worldX, this.input.activePointer.worldY, delta);
+    Dude.updateAnims();
+  }
 
   restartGame() {
     console.log("restartGAME");

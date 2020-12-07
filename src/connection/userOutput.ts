@@ -1,7 +1,9 @@
 import { gameUpdateObject, userInputEvents, youDie } from "../interfaces/interfaces";
 import { createDude, dudeFromServerEvents } from "../interfaces/dudeInterfaces";
+import { platformEventsFromServer } from "../interfaces/platformInterfaces";
 
 export default class userOutput {
+
   room: string;
   socket: SocketIO.Socket;
   constructor(socket: SocketIO.Socket, roomName: string) {
@@ -35,5 +37,11 @@ export default class userOutput {
   win() {
     console.log("win message send");
     this.socket.emit(userInputEvents.win);
+  }
+
+  destroyPlatform(id: number, sendToAllExceptMe = true) {
+    if (sendToAllExceptMe) {
+      this.socket.broadcast.emit(platformEventsFromServer.destroyPlatform, { id })
+    }
   }
 }

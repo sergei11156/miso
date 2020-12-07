@@ -7,6 +7,7 @@ import { GameScene } from "../gameScene";
 import PlatformManager from "../platforms/platformManager";
 import userConnectionManager from "./userConnectionManager";
 import userConnection from "./userConnection";
+import { platformDragToCloseZone, platformEventsFromClient } from "../interfaces/platformInterfaces";
 
 export default class UserInputServer {
   platformManager: PlatformManager;
@@ -42,5 +43,9 @@ export default class UserInputServer {
         scene.restartGame();
       }
     });
+
+    socket.on(platformEventsFromClient.platformDragToCloseZone, (params: platformDragToCloseZone) => {
+      this.platformManager.destroyPlatform(params, this.connection);
+    })
   }
 }

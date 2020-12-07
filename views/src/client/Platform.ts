@@ -7,7 +7,8 @@ import {
 } from "./interfaces/interfaces";
 import GameObject from "./gameObject";
 import { GameScene } from "./gameScene";
-import { platformCreate } from "./interfaces/platformInterfaces";
+import { platformCreate, platformDragToCloseZone, platformEventsFromClient, platformEventsFromServer } from "./interfaces/platformInterfaces";
+import Dude from "./Dude";
 
 export interface draggingPlatform {
   id: number;
@@ -19,19 +20,21 @@ export default class Platform extends GameObject {
   static io: any;
   static platforms: Platform[] = [];
   static imDead: boolean = false;
+  imNotInteractive = false;
 
-  static add(scene: GameScene, params: platformCreate): any {
+  static add(scene: GameScene, params: platformCreate, group: Phaser.Physics.Arcade.Group): any {
     let platform = new Platform(scene, params, this.io);
     this.platforms.push(platform);
+    // group.add(platform.sprite);
+    // platform.sprite.setMass(0.01);
+
+    // platform.sprite.setCircle(100);
     return platform;
   }
 
   static init(_io: any) {
     this.io = _io;
     this.io.on(userInputEvents.dragStart, (params: PlatformDragStartOrEnd) => {
-      if (Platform.imDead) {
-        return;
-      }
       try {
         let platform = this.getPlatform(params.id);
         if (platform.dragging) {
@@ -45,9 +48,6 @@ export default class Platform extends GameObject {
     });
 
     this.io.on(userInputEvents.dragEnd, (params: PlatformDragStartOrEnd) => {
-      if (Platform.imDead) {
-        return;
-      }
       try {
         let platform = this.getPlatform(params.id);
         if (!platform.dragging) {
@@ -61,9 +61,6 @@ export default class Platform extends GameObject {
     });
 
     this.io.on(userInputEvents.dragging, (params: PlatformDragging) => {
-      if (Platform.imDead) {
-        return;
-      }
       try {
         let platform = this.getPlatform(params.id);
         if (!platform.dragging) {
@@ -71,6 +68,14 @@ export default class Platform extends GameObject {
         }
 
         platform.dragTo(params.x, params.y);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.io.on(platformEventsFromServer.destroyPlatform, (params: { id: number}) => {
+      try {
+        let platform = this.getPlatform(params.id);
+        platform.destroy();
       } catch (error) {
         console.error(error);
       }
@@ -91,10 +96,15 @@ export default class Platform extends GameObject {
     this.sprite.setInteractive();
     scene.input.setDraggable(this.sprite);
 
-    this.sprite.on("dragstart", (pointer: any) => {
-      if (this.dragging) {
+    this.sprite.on("dragstart", (pointer: Phaser.Input.Pointer) => {
+      if (this.dragging || this.imNotInteractive || Platform.imDead) {
         return;
       }
+
+      if (this.checkIsPointerIsInCloseZone(pointer)) {
+        return;
+      }
+
       this.startDragging();
 
       const dragStart: PlatformDragStartOrEnd = {
@@ -104,7 +114,12 @@ export default class Platform extends GameObject {
       console.log(dragStart);
     });
 
-    this.sprite.on("drag", (pointer: any, dragX: number, dragY: number) => {
+    this.sprite.on("drag", (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+      if(Platform.imDead || this.imNotInteractive) return;
+      if (this.checkIsPointerIsInCloseZone(pointer)) {
+        this.whenDraggedToCloseZone();
+        return;
+      }
       this.dragTo(dragX, dragY);
 
       const dragNewPos: PlatformDragging = {
@@ -122,6 +137,12 @@ export default class Platform extends GameObject {
     });
   }
 
+  checkIsPointerIsInCloseZone(pointer: Phaser.Input.Pointer) {
+      const pointerPosition = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
+      const isPointerInCloseZone = Dude.isPointerInCloseZone(pointerPosition)
+      return isPointerInCloseZone;
+
+  }
   dragTo(x: number, y: number) {
     this.sprite.x = x;
     this.sprite.y = y;
@@ -135,6 +156,14 @@ export default class Platform extends GameObject {
     this.sprite.clearTint();
   }
 
+  whenDraggedToCloseZone() {
+    // this.imNotInteractive = true;
+    this.destroy();
+    const params: platformDragToCloseZone = {
+      id: this.id
+    }
+    Platform.io.emit(platformEventsFromClient.platformDragToCloseZone, params)
+  }
   static getPlatform(id: number) {
     for (const platform of this.platforms) {
       if (platform.id == id) {

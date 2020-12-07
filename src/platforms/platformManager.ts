@@ -3,6 +3,7 @@ import DudeServer from "../dude/dudeServer";
 import PlatformServer from "./PlatformServer";
 import { platformCreate, platformEventsFromServer } from "../interfaces/platformInterfaces";
 import { CreateContextOptions } from "vm";
+import userConnection from "../connection/userConnection";
 
 export default class PlatformManager {
   platforms: Phaser.Physics.Arcade.Group;
@@ -100,5 +101,14 @@ export default class PlatformManager {
   clear() {
     this.platforms.clear(true, true);
     this.platformTimer = 0;
+  }
+
+  destroyPlatform(params: {id : number}, connection: userConnection) {
+    try {
+      const platform = this.getPlatformServer(params.id)
+      platform.destroyPlatform(connection);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
