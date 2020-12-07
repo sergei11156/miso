@@ -21,13 +21,14 @@ export default class userConnectionManager {
     this.scene = scene;
   }
 
-  addConnection(socket: SocketIO.Socket) {
+  addConnection(socket: SocketIO.Socket, name: string) {
     const connection = new userConnection(
       socket,
       this.room,
       this.platformManager,
       this.scene,
-      this
+      this,
+      name
     );
     this.connections.add(connection);
     return connection;

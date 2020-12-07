@@ -14,4 +14,5 @@ export interface updateRoomData {
 
 export interface joinRoom {
   key: string;
+  name: string;
 }

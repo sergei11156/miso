@@ -30,7 +30,9 @@ export default class RoomManager {
       socket.on(roomFromClientEvents.join, (params: joinRoom) => {
         try {
           const room = this.getRoom(params.key);
-          room.addUser(socket);
+          console.log(params.name);
+          
+          room.addUser(socket, params.name);
         } catch (error) {
           console.error(error);
         }

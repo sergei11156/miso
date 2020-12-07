@@ -7,6 +7,7 @@ export default class Dude extends GameObject {
   static dudes: Set<Dude> = new Set();
   graphics: Phaser.GameObjects.Graphics;
   circle: Phaser.Geom.Circle;
+  myName: Phaser.GameObjects.Text;
   // closezone: Phaser.Physics.Arcade.Sprite;
   // private closezone:
   constructor(scene: GameScene, params: createDude, redzone: Phaser.Physics.Arcade.Group) {
@@ -15,7 +16,22 @@ export default class Dude extends GameObject {
     this.graphics = graphics;
     this.graphics.alpha = 0;
     this.circle = new Phaser.Geom.Circle(params.x, params.y, 150)
+    this.myName = scene.add.text(params.x, params.y, params.name)
+    console.log(params.name);
+    
+    if (params.cameraFollow) {
+      this.myName.setColor("#00FF08");
+    } else {
+      this.myName.setColor("#E43434")
+    }
+    this.updateTextPosition();
     Dude.dudes.add(this);
+  }
+
+  updateTextPosition() {
+    const topCentre = this.sprite.getTopCenter();
+    const width = this.myName.width
+    this.myName.setPosition(topCentre.x - width/2, topCentre.y - 20)
   }
 
   updatePos(x: number, y: number) {
@@ -28,10 +44,11 @@ export default class Dude extends GameObject {
       this.graphics.alpha -= .05
       this.updateGraphicsPosition();
     }
+    this.updateTextPosition();
   }
   destroy() {
     Dude.dudes.delete(this);
-    
+    this.myName.destroy();
     super.destroy();
     // this.closezone.destroy();
   }
@@ -42,7 +59,6 @@ export default class Dude extends GameObject {
     this.graphics.fillStyle(0xFF0000, 1)
     this.circle.setPosition(centre.x, centre.y)
     this.graphics.fillCircleShape(this.circle)
-
     // this.graphics.fillCircle(centre.x, centre.y, 150)
   }
 

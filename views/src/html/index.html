@@ -8,9 +8,24 @@
       body {
         margin: 0;
       }
+      .nameInput {
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+      }
+      #inputYourName {
+        font-size: 20px;
+        margin-bottom: 50px;
+      }
     </style>
   </head>
   <body>
+    <div class="nameInput">
+      <input id="inputYourName" type="text" placeholder="Введите имя" />
+    </div>
     <script src="bundle.js"></script>
   </body>
 </html>

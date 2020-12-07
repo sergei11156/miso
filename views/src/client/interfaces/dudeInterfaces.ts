@@ -7,4 +7,5 @@ export interface createDude {
   y: number;
   id: number;
   cameraFollow?: boolean;
+  name: string;
 }

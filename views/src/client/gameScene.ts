@@ -33,6 +33,7 @@ export class GameScene extends Phaser.Scene {
     this.redzones = this.physics.add.group();
     this.platforms= this.physics.add.group();
     this.io.on(dudeFromServerEvents.createDude, (params: createDude) => {
+      
       const dude = new Dude(this, params, this.redzones);
       if (params.cameraFollow) {
         this.cameraFollow = dude;

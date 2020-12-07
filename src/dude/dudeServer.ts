@@ -61,6 +61,7 @@ export default class DudeServer extends GameObject {
       id: this.id,
       x: center.x,
       y: center.y,
+      name: this.connection.userName
     };
     return params;
   }

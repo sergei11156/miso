@@ -97,9 +97,9 @@ export class GameScene extends Phaser.Scene {
     this._gameStateCallback(false);
   }
 
-  newUserConnect(socket: SocketIO.Socket) {
+  newUserConnect(socket: SocketIO.Socket, name: string) {
     let dude: DudeServer;
-    let uis = this.userConnectionManager.addConnection(socket);
+    let uis = this.userConnectionManager.addConnection(socket, name);
     socket.on(gameSceneFromClient.sceneReady, () => {
       dude = this.dudeManager.add(uis);
     });

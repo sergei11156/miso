@@ -1,5 +1,5 @@
 import { GameScene } from "../gameScene";
-import { updateRoomData } from "../interfaces/roomInterfaces";
+import { updateRoomData, youConnectedTo } from "../interfaces/roomInterfaces";
 import { joinRoom } from "../interfaces/roomInterfaces";
 import { roomFromServerEvents } from "../interfaces/roomInterfaces";
 
@@ -29,20 +29,20 @@ export default class Room {
     };
   }
 
-  addUser(socket: SocketIO.Socket) {
+  addUser(socket: SocketIO.Socket, name: string) {
     if (this.roomScene.gameStarted) {
       return;
     }
     socket.leave("wait");
     socket.join(this.key);
     this.playersCount++;
-    const joinObject: joinRoom = {
+    const joinObject: youConnectedTo = {
       key: this.key
     }
     socket.emit(roomFromServerEvents.youConnectedTo, joinObject)
     this.sendUpdateRoom();
     
-    this.roomScene.newUserConnect(socket);
+    this.roomScene.newUserConnect(socket, name);
 
     socket.on("disconnect", () => {
       socket.leave(this._key);
