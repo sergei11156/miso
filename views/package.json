@@ -20,7 +20,8 @@
     "watchify": "^3.11.1"
   },
   "dependencies": {
-    "socket.io-client": "^3.0.3",
-    "phaser": "^3.24.1"
+    "phaser": "^3.24.1",
+    "phaser3-rex-plugins": "^1.1.31",
+    "socket.io-client": "^3.0.3"
   }
 }

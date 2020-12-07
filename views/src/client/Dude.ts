@@ -82,10 +82,8 @@ export default class Dude extends GameObject {
     for (const dude of this.dudes) {
       const centre = dude.sprite.getCenter();
       const distance = Phaser.Math.Distance.BetweenPoints(pointer, centre);
-      console.log(distance);
 
       if (distance < 150) {
-        console.log("show close fucking zone");
         dude.showCloseZone();
         isIt = true;
       }

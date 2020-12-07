@@ -8,6 +8,7 @@
     "sourceMap": true,
     "outDir": "assets/js/",
     "baseUrl": ".",
+    "allowJs": true,
     "paths": {
       "*": ["node_modules/*"]
     }

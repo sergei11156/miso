@@ -116,9 +116,42 @@ export class GameScene extends Phaser.Scene {
     this.load.image("ground", "assets/platform.png");
     this.load.image("redzone", "assets/redZone.png");
     this.load.image("pointer", "assets/cursor.png");
+
+    this.load.scenePlugin(
+      "rexgesturesplugin",
+      "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js",
+      "rexGestures",
+      "rexGestures"
+    );
   }
 
   create(): void {
+    // @ts-ignore
+    const pinch:any = this.rexGestures.add.pinch({
+      enable: true,
+      
+    })
+    pinch.on("pinch", (pinch1: any)=> {
+      console.log("pinch");
+      let zoom = this.cameras.main.zoom 
+      zoom *= pinch1.scaleFactor;
+      if (zoom > 0.5 && zoom < 1.2) {
+        this.cameras.main.setZoom(zoom)
+      }
+    })
+    this.input.on("wheel", (pointer: any, gameObjects: any, deltaX: number, deltaY: number, deltaZ :number) => {
+      console.log({deltaX, deltaY, deltaZ});
+      let zoom = this.cameras.main.zoom 
+      if (deltaY > 0) {
+        zoom -= 0.05
+      } else {
+        zoom += 0.05
+      }
+      if (zoom > 0.5 && zoom < 1.2) {
+        this.cameras.main.setZoom(zoom)
+      }
+
+    })
     // const test = this.physics.add.sprite(2000, 300, "ground")
     // this.platforms.add(test);
     // this.pointer = new Pointer(this, this.platforms);
@@ -159,6 +192,7 @@ export class GameScene extends Phaser.Scene {
 
       console.log("IM DIE");
       Platform.imDead = true;
+      this.gameEnd();
     });
 
     this.io.on(userInputEvents.win, () => {
@@ -171,6 +205,7 @@ export class GameScene extends Phaser.Scene {
       );
       this.youDieText.scrollFactorX = 0;
       this.youDieText.scrollFactorY = 0;
+      this.gameEnd();
     });
 
     this.io.on(userInputEvents.remove, (params: die) => {
@@ -200,24 +235,35 @@ export class GameScene extends Phaser.Scene {
     // this.statusText.text = "СТАТУС: ГОТОВ";
     // this.io.emit(userInputEvents.ready);
     // });
+
     this.io.emit(gameSceneFromClient.sceneReady);
+  }
+  gameEnd() {
+    this.gameUI.style.display = "block";
   }
   update(time: number, delta: number): void {
     // console.log(this.input.activePointer);
     // this.pointer.setPosition(this, this.input.activePointer.worldX, this.input.activePointer.worldY, delta);
+    Dude.isPointerInCloseZone(
+      new Phaser.Math.Vector2(
+        this.input.activePointer.worldX,
+        this.input.activePointer.worldY
+      )
+    );
     Dude.updateAnims();
   }
 
   restartGame() {
     console.log("restartGAME");
     // this.statusText.text = "СТАТУС: НЕ ГОТОВ";
+    this.gameUI.style.display = "none";
     this.setButtonReadyState(false);
 
     if (this.youDieText) {
       this.youDieText.destroy();
       this.youDieText = undefined;
     }
-
+    Platform.imDead = false;
     for (const gameObject of this.gameObjects) {
       gameObject.destroy();
     }

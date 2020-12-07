@@ -23,7 +23,7 @@ const config: Phaser.Types.Core.GameConfig = {
       debugVelocityColor: 0x00ff00,
     },
   },
-  backgroundColor: "#5DADE2",
+  backgroundColor: "#5DADE2"
 };
 export class MiscoGame extends Phaser.Game {
   io: SocketIOClient.Socket;
