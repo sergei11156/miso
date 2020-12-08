@@ -96,6 +96,27 @@ export default class DudeManager {
       }
 
       this.gameStop();
+      return;
+    }
+    this.softArrangeDudes()
+  }
+  softArrangeDudes() {
+    let dudes = this.dudes.children.getArray();
+    let aliveDudes: DudeServer[] = [];
+    for (const dudeId in dudes) {
+      if (Object.prototype.hasOwnProperty.call(dudes, dudeId)) {
+        const dude = dudes[dudeId];
+        if(dude.active) {
+          aliveDudes.push(dude as DudeServer);
+        }
+      }
+    }
+
+    aliveDudes.sort((a, b) => {return a.xAxis - b.xAxis})
+    let xAxis = this.worldCenterX;
+    for (const dude of aliveDudes) {
+      dude.setNewX(xAxis);
+      xAxis += this.distanceBetweenDudes;
     }
   }
   countAlive() {
@@ -117,7 +138,8 @@ export default class DudeManager {
   arrangeDudesAndStop() {
     let xAxis = this.worldCenterX;
     this.dudes.children.each((dude: DudeServer) => {
-      dude.setVelocity(0);
+      dude.setVelocity(0, 0);
+      dude.setXAxisWithoutMoveToPosition(xAxis);
       dude.setPosition(xAxis, this.startPlayerYPosition);
       xAxis += this.distanceBetweenDudes;
       dude.setActive(true);

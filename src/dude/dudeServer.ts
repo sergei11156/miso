@@ -15,7 +15,9 @@ export default class DudeServer extends GameObject {
   private _xAxis: number;
   dudeManager: DudeManager;
   connection: userConnection;
-
+  get xAxis() {
+    return this._xAxis;
+  }
   constructor(
     connection: userConnection,
     xAxis: number,
@@ -67,7 +69,21 @@ export default class DudeServer extends GameObject {
     return params;
   }
 
+  setNewX(xAxis: number) {
+    this._xAxis = xAxis; 
+    const dudeCoord = this.getCenter();
+    const distance = xAxis - dudeCoord.x;
+    const speed = distance / 10;
+    
+    this.setVelocityX(speed);
+  }
   updateDude() {
+    if (this.body.velocity.x != 0) {
+      const centre = this.getCenter();
+      if (this.xAxis - 3 > centre.x && centre.x < this.xAxis + 3) {
+        this.setVelocityX(0);
+      }
+    }
     if (this.active) {
       const center = this.getCenter();
       const params: gameUpdateObject = {
@@ -82,6 +98,7 @@ export default class DudeServer extends GameObject {
   youDied() {
     const oldId = this.id;
     this.setVelocityY(0);
+    this.setVelocityX(0);
     this.setActive(false);
 
     // const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
@@ -103,5 +120,9 @@ export default class DudeServer extends GameObject {
   youWin() {
     this.connection.send.win();
     // this.socket.emit(userInputEvents.win);
+  }
+
+  setXAxisWithoutMoveToPosition(xAxis: number) {
+    this._xAxis = xAxis;
   }
 }

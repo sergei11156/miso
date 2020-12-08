@@ -9,7 +9,6 @@ import userConnectionManager from "./connection/userConnectionManager";
 import Room from "./rooms/room";
 
 export class GameScene extends Phaser.Scene {
-
   io: SocketIO.Server;
   startPlayerYPosition = 200;
   static lastObjectId: number = 0;
@@ -29,7 +28,7 @@ export class GameScene extends Phaser.Scene {
   private defaultForceGameStartTime = 10000;
   private forceStartTimer = 0;
   private forceTimerIsTik = false;
-  init(params: { io: SocketIO.Server; key: string, room: Room }) {
+  init(params: { io: SocketIO.Server; key: string; room: Room }) {
     this.io = params.io;
     this.key = params.key;
     const platforms = this.physics.add.group();
@@ -84,11 +83,13 @@ export class GameScene extends Phaser.Scene {
     }
 
     if (this.forceTimerIsTik && !this.gameStarted) {
-      this.forceStartTimer+=delta;
+      this.forceStartTimer += delta;
       // this.io.in
-      let time =  Math.floor((this.defaultForceGameStartTime - this.forceStartTimer) / 1000);
+      let time = Math.floor(
+        (this.defaultForceGameStartTime - this.forceStartTimer) / 1000
+      );
       this.userConnectionManager.timerUpdater(time);
-    
+
       if (this.forceStartTimer > this.defaultForceGameStartTime) {
         this.forceGameStartTimerOff();
         this.restartGame();
@@ -127,7 +128,9 @@ export class GameScene extends Phaser.Scene {
       let removeId = dude.id;
       if (dude) {
         this.dudeManager.dudes.remove(dude, true, true);
-        this.dudeManager.onSomeoneDie();
+        if (this._gameStarted) {
+          this.dudeManager.onSomeoneDie();
+        }
       }
       if (uis) {
         this.userConnectionManager.remove(uis, removeId);
@@ -135,7 +138,7 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  setGameStateCallback(f: (gameStarted: boolean)=>void) {
+  setGameStateCallback(f: (gameStarted: boolean) => void) {
     this._gameStateCallback = f;
   }
 
@@ -148,7 +151,7 @@ export class GameScene extends Phaser.Scene {
     if (this.gameStarted) {
       return;
     }
-    this.forceTimerIsTik = true; 
+    this.forceTimerIsTik = true;
     this.forceStartTimer = 0;
     this.userConnectionManager.timerGameStartOn();
   }
