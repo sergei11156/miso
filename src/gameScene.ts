@@ -118,13 +118,12 @@ export class GameScene extends Phaser.Scene {
       dude = this.dudeManager.add(uis);
     });
     socket.on("disconnect", (reason) => {
+      let removeId = dude.id;
       if (dude) {
-        let removeId = dude.id;
         this.dudeManager.dudes.remove(dude, true, true);
-        socket.broadcast.emit(userInputEvents.remove, { id: removeId });
       }
       if (uis) {
-        this.userConnectionManager.remove(uis);
+        this.userConnectionManager.remove(uis, removeId);
       }
     });
   }

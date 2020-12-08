@@ -32,6 +32,7 @@ export class GameScene extends Phaser.Scene {
 
   ready: boolean = false;
   gameUIClass: GameUI;
+  gameStarted: boolean = false;
 
   init(params: { io: SocketIOClient.Socket; roomName: string }) {
     this.io = params.io;
@@ -56,6 +57,7 @@ export class GameScene extends Phaser.Scene {
       }
     );
 
+    this.gameUIClass = new GameUI(this.io, this, params.roomName); 
   }
 
 
@@ -121,6 +123,7 @@ export class GameScene extends Phaser.Scene {
       console.log("IM DIE");
       Platform.imDead = true;
       this.gameUIClass.gameEnd();
+      this.gameStarted = false;
     });
 
     this.io.on(userInputEvents.win, () => {
@@ -134,6 +137,7 @@ export class GameScene extends Phaser.Scene {
       this.youDieText.scrollFactorX = 0;
       this.youDieText.scrollFactorY = 0;
       this.gameUIClass.gameEnd();
+      this.gameStarted = false;
     });
 
     this.io.on(userInputEvents.remove, (params: { id: number }) => {
@@ -168,6 +172,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   restartGame() {
+    this.gameStarted = true;
     console.log("restartGAME");
     // this.statusText.text = "СТАТУС: НЕ ГОТОВ";
     this.gameUIClass.gameStart();

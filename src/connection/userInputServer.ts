@@ -42,8 +42,8 @@ export default class UserInputServer {
       }
     });
     socket.on(gameSceneFromClient.imNotReady, () => {
-      this.userConnectionManager.updateUsersList();
       this.connection.ready = false;
+      this.userConnectionManager.updateUsersList();
     });
     socket.on(platformEventsFromClient.platformDragToCloseZone, (params: platformDragToCloseZone) => {
       this.platformManager.destroyPlatform(params, this.connection);

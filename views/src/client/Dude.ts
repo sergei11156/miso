@@ -9,6 +9,7 @@ export default class Dude extends GameObject {
   circle: Phaser.Geom.Circle;
   myName: Phaser.GameObjects.Text;
   playerDude: boolean = false;
+  scene: GameScene;
   // closezone: Phaser.Physics.Arcade.Sprite;
   // private closezone:
   constructor(
@@ -17,6 +18,7 @@ export default class Dude extends GameObject {
     redzone: Phaser.Physics.Arcade.Group
   ) {
     super(scene, params.id, params.x, params.y, "dude");
+    this.scene = scene;
     const graphics = scene.add.graphics();
     this.graphics = graphics;
     this.graphics.alpha = 0;
@@ -85,14 +87,18 @@ export default class Dude extends GameObject {
 
   static isPointerInCloseZone(pointer: Phaser.Math.Vector2) {
     let isIt = false;
+
     for (const dude of this.dudes) {
+      if (!dude.scene.gameStarted) {
+        return false;
+      }
       if (dude.playerDude) {
         continue;
       }
       const centre = dude.sprite.getCenter();
       const distance = Phaser.Math.Distance.BetweenPoints(pointer, centre);
 
-      if (distance < 150) {
+      if (distance < 200) {
         dude.showCloseZone();
         isIt = true;
       }

@@ -68,12 +68,14 @@ export default class userConnectionManager {
   setAllToNotReady() {
     for (const user of this.connections) {
       user.ready = false;
-      console.log(user.ready);
     }
+    this.updateUsersList();
   }
 
-  remove(connection: userConnection) {
+  remove(connection: userConnection, id: number) {
+    connection.send.removeDude(id);
     this.connections.delete(connection);
+    this.updateUsersList();
   }
 
   timerGameStartOn() {

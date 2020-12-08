@@ -1,6 +1,6 @@
 import Dude from "./Dude";
 import { GameScene } from "./gameScene";
-import { gameSceneFromClient } from "./interfaces/gameSceneInterfaces";
+import { gameSceneFromClient, gameSceneFromServer, userList } from "./interfaces/gameSceneInterfaces";
 import { userInputEvents } from "./interfaces/interfaces";
 import Platform from "./Platform";
 import RoomsScene from "./rooms/roomsScene";
@@ -47,6 +47,10 @@ export default class GameUI {
         scene.scene.remove("gameScene");
       });
     });
+
+    this.io.on(gameSceneFromServer.userList, (params: userList) => {
+      this.createUsersList(params);
+    })
   }
 
   setButtonReadyState(state: boolean) {
@@ -67,12 +71,26 @@ export default class GameUI {
   gameStart() {
     this.gameUI.style.display = "none";
   }
-  createUsersList() {
-    let namesOfDudes = ["player1", "player2"];
+  createUsersList(params: userList) {
     this.usersUlElement.innerHTML = "";
-    for (const name of namesOfDudes) {
+    for (const user of params.users) {
       let li = document.createElement("li");
-      this.usersUlElement.appendChild(li).textContent = name;
+      let liTextContainer = document.createElement("span");
+      liTextContainer.classList.add("usersTextContainer")
+      let nameContainer = document.createElement("span");
+      nameContainer.textContent = user.name;
+      liTextContainer.appendChild(nameContainer)
+      let statusContainer = document.createElement("span");
+      if (user.statusReady) {
+        statusContainer.textContent = "готов"
+        statusContainer.classList.add("ready")
+      } else {
+        statusContainer.textContent = "не готов"
+        statusContainer.classList.add("notready")
+      }
+      liTextContainer.appendChild(statusContainer)
+      li.appendChild(liTextContainer)
+      this.usersUlElement.appendChild(li);
     }
   }
 }
