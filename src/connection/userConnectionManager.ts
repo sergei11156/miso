@@ -2,6 +2,7 @@ import { gameSceneFromServer, userList } from "../interfaces/gameSceneInterfaces
 import { GameScene } from "../gameScene";
 import PlatformManager from "../platforms/platformManager";
 import userConnection from "./userConnection";
+import Room from "../rooms/room";
 
 export default class userConnectionManager {
   connections: Set<userConnection> = new Set();
@@ -10,6 +11,7 @@ export default class userConnectionManager {
   platformManager: PlatformManager;
   scene: GameScene;
   private _lastId = 0;
+  roomClass: Room;
   get newId() {
     this._lastId++;
     return this._lastId;
@@ -19,12 +21,14 @@ export default class userConnectionManager {
     roomName: string,
     io: SocketIO.Server,
     platformManager: PlatformManager,
-    scene: GameScene
+    scene: GameScene,
+    room: Room
   ) {
     this.room = roomName;
     this.io = io;
     this.platformManager = platformManager;
     this.scene = scene;
+    this.roomClass = room;
   }
 
   addConnection(socket: SocketIO.Socket, name: string) {
@@ -77,7 +81,9 @@ export default class userConnectionManager {
     this.connections.delete(connection);
     this.updateUsersList();
   }
-
+  chcekIfRoomCanStart() {
+    this.roomClass.checkIfRoomCanStart();
+  }
   timerGameStartOn() {
     this.io.to(this.room).emit(gameSceneFromServer.gameStartTimerOn);
   }

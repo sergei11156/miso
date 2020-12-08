@@ -13,10 +13,10 @@ export default class Room {
   private io: SocketIO.Server;
   private roomScene: GameScene;
 
-  constructor(io: SocketIO.Server, createRoom: (key: string) => GameScene) {
+  constructor(io: SocketIO.Server, createRoom: (key: string, room: Room) => GameScene) {
     this._key = this.makeKey(5);
     this.io = io;
-    this.roomScene = createRoom(this.key);
+    this.roomScene = createRoom(this.key, this);
     this.roomScene.setGameStateCallback(()=> {
       this.sendUpdateRoom();
     })

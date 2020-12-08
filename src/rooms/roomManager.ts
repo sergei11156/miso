@@ -11,7 +11,7 @@ export default class RoomManager {
   private rooms: Room[] = [];
   private io: SocketIO.Server;
 
-  constructor(io: SocketIO.Server, createRoom: (key: string) => GameScene) {
+  constructor(io: SocketIO.Server, createRoom: (key: string, room: Room) => GameScene) {
     this.io = io;
     this.createNewRoom(createRoom);
     this.createNewRoom(createRoom);
@@ -40,7 +40,7 @@ export default class RoomManager {
     });
   }
 
-  createNewRoom(createRoom: (key: string) => GameScene) {
+  createNewRoom(createRoom: (key: string, room: Room) => GameScene) {
     const room = new Room(this.io, createRoom);
     this.rooms.push(room);
   }

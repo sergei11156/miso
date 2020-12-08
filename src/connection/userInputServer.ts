@@ -39,11 +39,14 @@ export default class UserInputServer {
       this.userConnectionManager.updateUsersList();
       if (this.userConnectionManager.isAllReady() && !scene.gameStarted) {
         scene.restartGame();
+      } else {
+        this.userConnectionManager.chcekIfRoomCanStart();
       }
     });
     socket.on(gameSceneFromClient.imNotReady, () => {
       this.connection.ready = false;
       this.userConnectionManager.updateUsersList();
+      this.userConnectionManager.chcekIfRoomCanStart();
     });
     socket.on(platformEventsFromClient.platformDragToCloseZone, (params: platformDragToCloseZone) => {
       this.platformManager.destroyPlatform(params, this.connection);

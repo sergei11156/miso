@@ -6,6 +6,7 @@ import DudeManager from "./dude/dudeManager";
 import PlatformManager from "./platforms/platformManager";
 import { gameSceneFromClient } from "./interfaces/gameSceneInterfaces";
 import userConnectionManager from "./connection/userConnectionManager";
+import Room from "./rooms/room";
 
 export class GameScene extends Phaser.Scene {
 
@@ -28,7 +29,7 @@ export class GameScene extends Phaser.Scene {
   private defaultForceGameStartTime = 10000;
   private forceStartTimer = 0;
   private forceTimerIsTik = false;
-  init(params: { io: SocketIO.Server; key: string }) {
+  init(params: { io: SocketIO.Server; key: string, room: Room }) {
     this.io = params.io;
     this.key = params.key;
     const platforms = this.physics.add.group();
@@ -51,7 +52,8 @@ export class GameScene extends Phaser.Scene {
       params.key,
       params.io,
       this.platformManager,
-      this
+      this,
+      params.room
     );
   }
 
@@ -84,6 +86,9 @@ export class GameScene extends Phaser.Scene {
     if (this.forceTimerIsTik && !this.gameStarted) {
       this.forceStartTimer+=delta;
       // this.io.in
+      let time =  Math.floor((this.defaultForceGameStartTime - this.forceStartTimer) / 1000);
+      this.userConnectionManager.timerUpdater(time);
+    
       if (this.forceStartTimer > this.defaultForceGameStartTime) {
         this.forceGameStartTimerOff();
         this.restartGame();
@@ -135,9 +140,14 @@ export class GameScene extends Phaser.Scene {
   forceGameStartTimerOff() {
     this.forceTimerIsTik = false;
     this.forceStartTimer = 0;
+    this.userConnectionManager.timerGameStartOff();
   }
   forceGameStartTimerOn() {
+    if (this.gameStarted) {
+      return;
+    }
     this.forceTimerIsTik = true; 
     this.forceStartTimer = 0;
+    this.userConnectionManager.timerGameStartOn();
   }
 }

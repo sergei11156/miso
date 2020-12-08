@@ -13,7 +13,8 @@ export default class GameUI {
   quitRoomButton: NodeListOf<HTMLButtonElement>;
   io: SocketIOClient.Socket;
   scene: GameScene;
-
+  underUsers: HTMLDivElement;
+  private notEnouthPlayersText = false
 
   constructor(io: SocketIOClient.Socket, scene: GameScene, roomName: string) {
     this.io = io;
@@ -24,7 +25,7 @@ export default class GameUI {
     this.usersUlElement = document.querySelector(".users");
     this.readyButton = document.querySelector(".readyButton");
     this.quitRoomButton = document.querySelectorAll(".quitRoomButton");
-
+    this.underUsers = document.querySelector(".underUsers");
     this.roomNameElement.textContent = "Комната: " + roomName;
     this.setButtonReadyState(false);
     this.readyButton.addEventListener("click", () => {
@@ -51,6 +52,21 @@ export default class GameUI {
     this.io.on(gameSceneFromServer.userList, (params: userList) => {
       this.createUsersList(params);
     })
+
+    this.io.on(gameSceneFromServer.gameStartTimerOn, () => {
+      this.underUsers.textContent = "Большинство готовы, старт через "
+    });
+    this.io.on(gameSceneFromServer.gameStartTimerUpdate, (time: number) => {
+      this.underUsers.textContent = "Большинство готовы, старт через " + time;
+    }) 
+    this.io.on(gameSceneFromServer.gameStartTimerOff, () => {
+      if (this.notEnouthPlayersText) {
+        return;
+      } else {
+        this.underUsers.textContent = "";
+      }
+    });
+
   }
 
   setButtonReadyState(state: boolean) {
@@ -91,6 +107,14 @@ export default class GameUI {
       liTextContainer.appendChild(statusContainer)
       li.appendChild(liTextContainer)
       this.usersUlElement.appendChild(li);
+    }
+    if (!this.notEnouthPlayersText && params.users.length < 2) {
+      this.notEnouthPlayersText = true;
+      this.underUsers.textContent = "Нельзя начать одному, ожидание игроков";
+    }
+    if (this.notEnouthPlayersText && params.users.length > 1) {
+      this.notEnouthPlayersText = false;
+      this.underUsers.textContent = "";
     }
   }
 }

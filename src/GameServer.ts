@@ -1,6 +1,7 @@
 import "@geckos.io/phaser-on-nodejs";
 import "phaser";
 import { GameScene } from "./gameScene";
+import Room from "./rooms/room";
 import RoomManager from "./rooms/roomManager";
 
 const worldWidth = 1000;
@@ -29,12 +30,12 @@ export default class GameServer extends Phaser.Game {
     super(config);
     this.io = io;
     this.events.on("ready", () => {
-      const roomManager = new RoomManager(io, (key) => {return this.createRoom(key)});
+      const roomManager = new RoomManager(io, (key, room) => {return this.createRoom(key, room)});
     })
   }
 
-  createRoom(key: string) {
-    const scene = this.scene.add(key, GameScene, true, { io: this.io, key }) as GameScene;
+  createRoom(key: string, room: Room) {
+    const scene = this.scene.add(key, GameScene, true, { io: this.io, key, room }) as GameScene;
     return scene;
   }
 }
