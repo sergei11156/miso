@@ -38,9 +38,7 @@ export default class UserInputServer {
       this.connection.ready = true;
       console.log("player ready");
 
-      if (this.userConnectionManager.isAllReady()) {
-        console.log("all ready, start");
-
+      if (this.userConnectionManager.isAllReady() && !scene.gameStarted) {
         scene.restartGame();
       }
     });

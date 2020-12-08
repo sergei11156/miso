@@ -81,7 +81,7 @@ export class GameScene extends Phaser.Scene {
       this.dudeManager.update(delta);
     }
 
-    if (this.forceTimerIsTik) {
+    if (this.forceTimerIsTik && !this.gameStarted) {
       this.forceStartTimer+=delta;
       // this.io.in
       if (this.forceStartTimer > this.defaultForceGameStartTime) {
@@ -93,6 +93,7 @@ export class GameScene extends Phaser.Scene {
 
   restartGame() {
     this.physics.resume();
+    this.forceGameStartTimerOff();
     this.io.emit(userInputEvents.restartGame);
     this.platformManager.clear();
     this._gameStarted = true;
