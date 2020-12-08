@@ -152,11 +152,11 @@ export class GameScene extends Phaser.Scene {
       }
 
     })
+
     // const test = this.physics.add.sprite(2000, 300, "ground")
     // this.platforms.add(test);
     // this.pointer = new Pointer(this, this.platforms);
     // this.input.setDefaultCursor("url(assets/cursor.png), pointer")
-    console.log("create complict");
 
     Platform.init(this.io);
     // Platform.add(this, {id: 100, x: 2000, y: 300}, this.platforms)
@@ -208,9 +208,9 @@ export class GameScene extends Phaser.Scene {
       this.gameEnd();
     });
 
-    this.io.on(userInputEvents.remove, (params: die) => {
-      console.log(params);
-    });
+    // this.io.on(userInputEvents.remove, (params: die) => {
+      // console.log(params);
+    // });
 
     this.io.on(userInputEvents.remove, (params: { id: number }) => {
       this.getGameObject(params.id).destroy();
@@ -226,21 +226,13 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, 20000, 2e6);
     this.physics.world.setBounds(0, 0, 20000, 2e6);
 
-    // this.statusText = this.add.text(20, 20, "СТАТУС: НЕ ГОТОВ");
-
-    // this.statusText.scrollFactorX = 0;
-    // this.statusText.scrollFactorY = 0;
-    // this.statusText.setInteractive();
-    // this.statusText.on("pointerdown", () => {
-    // this.statusText.text = "СТАТУС: ГОТОВ";
-    // this.io.emit(userInputEvents.ready);
-    // });
-
     this.io.emit(gameSceneFromClient.sceneReady);
   }
+
   gameEnd() {
     this.gameUI.style.display = "block";
   }
+
   update(time: number, delta: number): void {
     // console.log(this.input.activePointer);
     // this.pointer.setPosition(this, this.input.activePointer.worldX, this.input.activePointer.worldY, delta);

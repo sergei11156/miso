@@ -8,6 +8,7 @@ export default class Dude extends GameObject {
   graphics: Phaser.GameObjects.Graphics;
   circle: Phaser.Geom.Circle;
   myName: Phaser.GameObjects.Text;
+  playerDude: boolean = false;
   // closezone: Phaser.Physics.Arcade.Sprite;
   // private closezone:
   constructor(
@@ -19,7 +20,7 @@ export default class Dude extends GameObject {
     const graphics = scene.add.graphics();
     this.graphics = graphics;
     this.graphics.alpha = 0;
-    this.circle = new Phaser.Geom.Circle(params.x, params.y, 150);
+    this.circle = new Phaser.Geom.Circle(params.x, params.y, 200);
     this.myName = scene.add.text(params.x, params.y, params.name);
     console.log(params.name);
 
@@ -30,6 +31,9 @@ export default class Dude extends GameObject {
     }
     this.updateTextPosition();
     Dude.dudes.add(this);
+    if (params.cameraFollow) {
+      this.playerDude = true;
+    }
   }
 
   updateTextPosition() {
@@ -82,6 +86,9 @@ export default class Dude extends GameObject {
   static isPointerInCloseZone(pointer: Phaser.Math.Vector2) {
     let isIt = false;
     for (const dude of this.dudes) {
+      if (dude.playerDude) {
+        continue;
+      }
       const centre = dude.sprite.getCenter();
       const distance = Phaser.Math.Distance.BetweenPoints(pointer, centre);
 
