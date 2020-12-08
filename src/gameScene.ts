@@ -98,6 +98,7 @@ export class GameScene extends Phaser.Scene {
 
   restartGame() {
     this.physics.resume();
+    this.userConnectionManager.gameStartResetOldParams();
     this.forceGameStartTimerOff();
     this.io.emit(userInputEvents.restartGame);
     this.platformManager.clear();
@@ -111,7 +112,7 @@ export class GameScene extends Phaser.Scene {
     this._gameStarted = false;
     this.platformManager.clear();
     this.platformManager.gameStarted = false;
-    this.userConnectionManager.setAllToNotReady();
+    this.userConnectionManager.gameEndResetParams();
     this.dudeManager.gameEnd();
     this._gameStateCallback(false);
   }
@@ -126,6 +127,7 @@ export class GameScene extends Phaser.Scene {
       let removeId = dude.id;
       if (dude) {
         this.dudeManager.dudes.remove(dude, true, true);
+        this.dudeManager.onSomeoneDie();
       }
       if (uis) {
         this.userConnectionManager.remove(uis, removeId);

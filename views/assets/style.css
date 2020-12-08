@@ -69,10 +69,67 @@ body {
   justify-content: space-between;
 }
 
-
 .users li .ready {
   color: #41e320;
 }
 .users li .notready {
   color: #c80707;
+}
+
+.gameEnd {
+  display: flex;
+  visibility: hidden;
+  position: absolute;
+  color: white;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 0;
+}
+.gameEnd .appearAnimationContainer {
+  background-color: #173144;
+  padding: 0;
+  color: white;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  max-width: 0;
+  max-height: 0;
+  transition: 1s all;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+}
+
+.gameEnd .appearAnimationContainer .result {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gameEnd .backToTheGame {
+  text-transform: uppercase;
+  padding: 5px;
+  outline: none;
+  border: none;
+}
+.gameEnd .backToTheGame.notReadyToStart {
+  background-color: #075000;
+  color: #a19f9f;
+}
+.gameEnd .backToTheGame.notReadyToStart::after {
+  content: "Нужно дождаться, когда остальные игроки доиграют";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 20%;
+}
+.gameEnd .backToTheGame.readyToStart {
+  background-color: #21ce10;
+  color: #000000;
 }

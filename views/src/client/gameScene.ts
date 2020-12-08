@@ -106,39 +106,7 @@ export class GameScene extends Phaser.Scene {
       this.restartGame();
     });
 
-    this.io.on(userInputEvents.youDie, (params: youDie) => {
-      this.youDieText = this.add.text(
-        this.cameras.main.width / 2,
-        this.cameras.main.height / 2,
-        "ВЫ НЕ СПАСЛИСЬ"
-      );
-      this.youDieText.scrollFactorX = 0;
-      this.youDieText.scrollFactorY = 0;
-      if (params.newFollowId) {
-        const newFollow = this.getGameObject(params.newFollowId);
-        this.cameraFollow = newFollow;
-        this.cameraStartFollow();
-      }
 
-      console.log("IM DIE");
-      Platform.imDead = true;
-      this.gameUIClass.gameEnd();
-      this.gameStarted = false;
-    });
-
-    this.io.on(userInputEvents.win, () => {
-      console.log("I WIN");
-
-      this.youDieText = this.add.text(
-        this.cameras.main.width / 2,
-        this.cameras.main.height / 2,
-        "ВЫ СПАСЛИСЬ! ТИПО ПОБЕДИЛИ, РЕСПЕКЕТ, КРАСАВА"
-      );
-      this.youDieText.scrollFactorX = 0;
-      this.youDieText.scrollFactorY = 0;
-      this.gameUIClass.gameEnd();
-      this.gameStarted = false;
-    });
 
     this.io.on(userInputEvents.remove, (params: { id: number }) => {
       this.getGameObject(params.id).destroy();
@@ -157,7 +125,10 @@ export class GameScene extends Phaser.Scene {
     this.io.emit(gameSceneFromClient.sceneReady);
   }
 
-
+  gameStop() {
+    Platform.imDead = true;
+    this.gameStarted = false;
+  }
 
   update(time: number, delta: number): void {
     // console.log(this.input.activePointer);

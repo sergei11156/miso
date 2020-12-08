@@ -115,6 +115,7 @@ export default class Platform extends GameObject {
     });
 
     this.sprite.on("drag", (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+      if(!this.dragging) return;
       if(Platform.imDead) return;
       if (this.checkIsPointerIsInCloseZone(pointer)) {
         this.whenDraggedToCloseZone();

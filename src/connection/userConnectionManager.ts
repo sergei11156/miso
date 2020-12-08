@@ -1,8 +1,12 @@
-import { gameSceneFromServer, userList } from "../interfaces/gameSceneInterfaces";
+import {
+  gameSceneFromServer,
+  userList,
+} from "../interfaces/gameSceneInterfaces";
 import { GameScene } from "../gameScene";
 import PlatformManager from "../platforms/platformManager";
 import userConnection from "./userConnection";
 import Room from "../rooms/room";
+import DudeServer from "../dude/dudeServer";
 
 export default class userConnectionManager {
   connections: Set<userConnection> = new Set();
@@ -45,17 +49,46 @@ export default class userConnectionManager {
     this.updateUsersList();
     return connection;
   }
+
   updateUsersList() {
-    let params: userList = {users: []};
+    let params: userList = { users: [] };
     for (const connection of this.connections) {
       params.users.push({
         id: connection.id,
         name: connection.userName,
-        statusReady: connection.ready
+        statusReady: connection.ready,
       });
     }
-    this.io.to(this.room).emit(gameSceneFromServer.userList, params)
+    this.io.to(this.room).emit(gameSceneFromServer.userList, params);
   }
+  gameEndResetParams() {
+    this.setAllToNotReady();
+    this.updateUsersListWithScore();
+  }
+  gameStartResetOldParams(){
+    for (const conn of this.connections) {
+      conn.send.score = undefined;
+    }
+  }
+  updateUsersListWithScore() {
+    
+    let usersScore: userList = {
+      users: [],
+      canStartNewGame: !this.scene.gameStarted
+    };
+    for (const conn of this.connections) {
+      usersScore.users.push({
+        id: conn.id,
+        name: conn.userName,
+        points: conn.score,
+      });
+    }
+    
+    this.io
+      .to(this.room)
+      .emit(gameSceneFromServer.userListWithPoints, usersScore);
+  }
+
   isAllReady() {
     if (this.connections.size < 2) {
       return false;
@@ -91,7 +124,6 @@ export default class userConnectionManager {
     this.io.to(this.room).emit(gameSceneFromServer.gameStartTimerOff);
   }
   timerUpdater(time: number) {
-    this.io.to(this.room).emit(gameSceneFromServer.gameStartTimerUpdate, time)
+    this.io.to(this.room).emit(gameSceneFromServer.gameStartTimerUpdate, time);
   }
-
 }

@@ -11,9 +11,14 @@ export default class DudeManager {
   worldCenterX: number;
   gameStop: () => void;
   platformManager: PlatformManager;
+  deadDudes = 0;
 
   add(connection: userConnection) {
-    const newDude = new DudeServer(connection, this.getNewPositionForDude(), this);
+    const newDude = new DudeServer(
+      connection,
+      this.getNewPositionForDude(),
+      this
+    );
     newDude.sendCreateEvent();
 
     this.dudes.children.each((dude: DudeServer) => {
@@ -55,6 +60,7 @@ export default class DudeManager {
 
   startGame() {
     let xAxisOffset = 0;
+    this.deadDudes = 0;
     this.dudes.children.each((dude: DudeServer) => {
       dude.gameStart(xAxisOffset);
       xAxisOffset += this.distanceBetweenDudes;
@@ -100,7 +106,7 @@ export default class DudeManager {
       }
     });
     console.log("count Alive = " + count);
-    
+
     return count;
   }
 
@@ -114,7 +120,15 @@ export default class DudeManager {
       dude.setVelocity(0);
       dude.setPosition(xAxis, this.startPlayerYPosition);
       xAxis += this.distanceBetweenDudes;
+      dude.setActive(true);
       dude.updateDude();
     });
+  }
+
+  imDeadGetMyScore() {
+    const totalDudes = this.dudes.getLength();
+    const score = totalDudes - this.deadDudes;
+    this.deadDudes++;
+    return score;
   }
 }

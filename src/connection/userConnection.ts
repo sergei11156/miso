@@ -1,3 +1,4 @@
+import DudeServer from "../dude/dudeServer";
 import { GameScene } from "../gameScene";
 import PlatformManager from "../platforms/platformManager";
 import userConnectionManager from "./userConnectionManager";
@@ -12,6 +13,10 @@ export default class userConnection {
   userInput: UserInputServer;
   userName: string;
   id: number;
+  dude: DudeServer;
+  get score() {
+    return this.send.score;
+  }
   constructor(
     socket: SocketIO.Socket,
     roomName: string,
@@ -27,5 +32,9 @@ export default class userConnection {
     this.send = new userOutput(socket, userConnectionManager, roomName);
     this.userInput = new UserInputServer(socket, scene, platformManager, userConnectionManager, this);
     this.userName = name;
+  }
+
+  setDude(dude: DudeServer) {
+    this.dude = dude
   }
 }

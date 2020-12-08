@@ -15,7 +15,7 @@ export default class PlatformManager {
 
   update(delta: number, dudes: DudeServer[]) {
     this.platformTimer += delta;
-    if (this.platformTimer > 1000) {
+    if (this.platformTimer > 10000) {
       this.platformTimer = 0;
       for (const dude of dudes) {
         this.spawnPlatform(dude);

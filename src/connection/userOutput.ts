@@ -6,11 +6,14 @@ import {
 import { createDude, dudeFromServerEvents } from "../interfaces/dudeInterfaces";
 import { platformEventsFromServer } from "../interfaces/platformInterfaces";
 import userConnectionManager from "./userConnectionManager";
+import { youDieWithScore } from "../interfaces/gameSceneInterfaces";
+import { gameSceneFromServer } from "../interfaces/gameSceneInterfaces";
 
 export default class userOutput {
   room: string;
   socket: SocketIO.Socket;
   userConnectionManager: userConnectionManager;
+  score: number = undefined;
   constructor(
     socket: SocketIO.Socket,
     userConnectionManager: userConnectionManager,
@@ -36,20 +39,21 @@ export default class userOutput {
     this.socket.emit(userInputEvents.update, params);
   }
 
-  die(id: number) {
-    console.log("die message send");
-
-    const youDead: youDie = {
-      id,
+  die(score: number) {
+    this.score = score;
+    const youDead: youDieWithScore = {
+      score
     };
-    this.socket.emit(userInputEvents.youDie, youDead);
-    this.socket.broadcast.in(this.room).emit(userInputEvents.die, youDead);
+    this.socket.emit(gameSceneFromServer.youDieWithScore, youDead);
+    this.userConnectionManager.updateUsersListWithScore();
+    // this.socket.broadcast.in(this.room).emit(userInputEvents.die, youDead);
   }
 
+  
   win() {
-    console.log("win message send");
-    this.userConnectionManager.updateUsersList();
-    this.socket.emit(userInputEvents.win);
+    this.score = 1;
+    this.socket.emit(gameSceneFromServer.victory);
+    this.userConnectionManager.updateUsersListWithScore();
   }
 
   destroyPlatform(id: number, sendToAllExceptMe = true) {

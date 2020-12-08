@@ -30,6 +30,7 @@ export default class DudeServer extends GameObject {
     this._xAxis = xAxis;
     this.connection = connection;
     this.dudeManager = dudeManager;
+    connection.setDude(this)
     dudeManager.dudes.add(this, true);
     this.body.setSize(32, 48);
     this.setCollideWorldBounds(false);
@@ -82,7 +83,6 @@ export default class DudeServer extends GameObject {
     const oldId = this.id;
     this.setVelocityY(0);
     this.setActive(false);
-    console.log(this.id);
 
     // const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
 
@@ -95,8 +95,8 @@ export default class DudeServer extends GameObject {
     // const dieData: die = { id: oldId };
     // this.socket.emit(userInputEvents.youDie, youDie);
     // this.socket.broadcast.emit(userInputEvents.die, dieData);
-
-    this.connection.send.die(oldId);
+    let score = this.dudeManager.imDeadGetMyScore();
+    this.connection.send.die(score);
     this.dudeManager.onSomeoneDie();
   }
 
