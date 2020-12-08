@@ -1,9 +1,15 @@
 import express from "express";
 import GameServer from "./GameServer";
+import http from "http";
+import https from "https";
+import fs from "fs";
+
+let httpsOptions = {
+    key: fs.readFileSync("/usr/src/app/dist/key.key"), // путь к ключу
+    cert: fs.readFileSync("/usr/src/app/dist/sergei11156_ru.crt") // путь к сертификату
+}
 
 const app = express();
-
-const port = 80; // default port to listen
 const views = "/usr/src/app/views/dist/";
 const assets = "/usr/src/app/views/assets/";
 
@@ -17,9 +23,12 @@ app.get( "/bundle.js", ( req, res ) => {
 
 app.use('/assets', express.static(assets));
 
-const server = app.listen( port, () => {
-    console.log( `server started at http://localhost:${ port }` );
-} );
+http.createServer(function (req, res) {
+    res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+    res.end();
+}).listen(80);
 
-const io: SocketIO.Server = require("socket.io")(server)
+const httpsServer = https.createServer(httpsOptions, app).listen(443);
+
+const io: SocketIO.Server = require("socket.io")(httpsServer)
 const gameServer = new GameServer(io);

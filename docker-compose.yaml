@@ -8,6 +8,7 @@ services:
       dockerfile: ./DockerFile
     ports:
       - 80:80
+      - 443:443
     volumes:
       - ./dist:/usr/src/app/dist
       - ./views:/usr/src/app/views
