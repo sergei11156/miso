@@ -11,14 +11,17 @@ export default class userConnection {
   send: userOutput;
   userInput: UserInputServer;
   userName: string;
+  id: number;
   constructor(
     socket: SocketIO.Socket,
     roomName: string,
     platformManager: PlatformManager,
     scene: GameScene,
     userConnectionManager: userConnectionManager,
-    name: string
+    name: string,
+    id: number
   ) {
+    this.id = id;
     this.room = roomName;
     this.socket = socket;
     this.send = new userOutput(socket, roomName);

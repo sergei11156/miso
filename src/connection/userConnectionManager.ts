@@ -1,4 +1,4 @@
-import { gameSceneFromServer } from "../interfaces/gameSceneInterfaces";
+import { gameSceneFromServer, userList } from "../interfaces/gameSceneInterfaces";
 import { GameScene } from "../gameScene";
 import PlatformManager from "../platforms/platformManager";
 import userConnection from "./userConnection";
@@ -9,6 +9,11 @@ export default class userConnectionManager {
   room: string;
   platformManager: PlatformManager;
   scene: GameScene;
+  private _lastId = 0;
+  get newId() {
+    this._lastId++;
+    return this._lastId;
+  }
 
   constructor(
     roomName: string,
@@ -29,10 +34,23 @@ export default class userConnectionManager {
       this.platformManager,
       this.scene,
       this,
-      name
+      name,
+      this.newId
     );
     this.connections.add(connection);
+    this.updateUsersList();
     return connection;
+  }
+  updateUsersList() {
+    let params: userList = {users: []};
+    for (const connection of this.connections) {
+      params.users.push({
+        id: connection.id,
+        name: connection.userName,
+        statusReady: connection.ready
+      });
+    }
+    this.io.to(this.room).emit(gameSceneFromServer.userList, params)
   }
   isAllReady() {
     if (this.connections.size < 2) {

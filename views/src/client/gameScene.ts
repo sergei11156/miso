@@ -18,6 +18,7 @@ import {
 } from "./interfaces/platformInterfaces";
 import Pointer from "./pointer";
 import RoomsScene from "./rooms/roomsScene";
+import GameUI from "./gameUI";
 
 export class GameScene extends Phaser.Scene {
   private cameraFollow?: GameObject;
@@ -28,16 +29,15 @@ export class GameScene extends Phaser.Scene {
   pointer: Pointer;
   redzones: Phaser.Physics.Arcade.Group;
   platforms: Phaser.Physics.Arcade.Group;
-  gameUI: HTMLDivElement;
-  roomNameElement: HTMLDivElement;
-  usersUlElement: HTMLUListElement;
-  readyButton: HTMLButtonElement;
-  quitRoomButton: NodeListOf<HTMLButtonElement>;
-  private ready: boolean = false;
+
+  ready: boolean = false;
+  gameUIClass: GameUI;
+
   init(params: { io: SocketIOClient.Socket; roomName: string }) {
     this.io = params.io;
     this.redzones = this.physics.add.group();
     this.platforms = this.physics.add.group();
+
     this.io.on(dudeFromServerEvents.createDude, (params: createDude) => {
       const dude = new Dude(this, params, this.redzones);
       if (params.cameraFollow) {
@@ -46,7 +46,6 @@ export class GameScene extends Phaser.Scene {
       }
       this.gameObjects.push(dude);
 
-      this.createUsersList();
     });
 
     this.io.on(
@@ -57,56 +56,9 @@ export class GameScene extends Phaser.Scene {
       }
     );
 
-    this.gameUI = document.querySelector(".gameUi");
-    this.gameUI.style.display = "block";
-    this.roomNameElement = document.querySelector(".roomName");
-    this.usersUlElement = document.querySelector(".users");
-    this.readyButton = document.querySelector(".readyButton");
-    this.quitRoomButton = document.querySelectorAll(".quitRoomButton");
+  }
 
-    this.roomNameElement.textContent = "Комната: " + params.roomName;
-    this.setButtonReadyState(false);
-    this.readyButton.addEventListener("click", () => {
-      if (!this.ready) {
-        this.setButtonReadyState(true);
-        this.io.emit(userInputEvents.ready);
-      } else {
-        this.setButtonReadyState(false);
-        this.io.emit(gameSceneFromClient.imNotReady);
-      }
-    });
 
-    this.quitRoomButton.forEach((el) => {
-      el.addEventListener("click", () => {
-        this.io.disconnect();
-        Dude.reset();
-        Platform.reset();
-        this.gameUI.style.display = "none";
-        this.scene.add("roomsScene", RoomsScene, true);
-        this.scene.remove("gameScene");
-      });
-    });
-  }
-  setButtonReadyState(state: boolean) {
-    this.ready = state;
-    if (this.ready) {
-      this.readyButton.textContent = "НЕ ГОТОВ";
-      this.readyButton.classList.remove("ready");
-      this.readyButton.classList.add("notready");
-    } else {
-      this.readyButton.textContent = "ГОТОВ!";
-      this.readyButton.classList.add("ready");
-      this.readyButton.classList.remove("notready");
-    }
-  }
-  createUsersList() {
-    let namesOfDudes = ["player1", "player2"];
-    this.usersUlElement.innerHTML = "";
-    for (const name of namesOfDudes) {
-      let li = document.createElement("li");
-      this.usersUlElement.appendChild(li).textContent = name;
-    }
-  }
   preload(): void {
     this.load.spritesheet("dude", "assets/dude.png", {
       frameWidth: 32,
@@ -126,32 +78,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
-    // @ts-ignore
-    const pinch:any = this.rexGestures.add.pinch({
-      enable: true,
-      
-    })
-    pinch.on("pinch", (pinch1: any)=> {
-      console.log("pinch");
-      let zoom = this.cameras.main.zoom 
-      zoom *= pinch1.scaleFactor;
-      if (zoom > 0.5 && zoom < 1.2) {
-        this.cameras.main.setZoom(zoom)
-      }
-    })
-    this.input.on("wheel", (pointer: any, gameObjects: any, deltaX: number, deltaY: number, deltaZ :number) => {
-      console.log({deltaX, deltaY, deltaZ});
-      let zoom = this.cameras.main.zoom 
-      if (deltaY > 0) {
-        zoom -= 0.05
-      } else {
-        zoom += 0.05
-      }
-      if (zoom > 0.5 && zoom < 1.2) {
-        this.cameras.main.setZoom(zoom)
-      }
+    this.setPinch();
 
-    })
 
     // const test = this.physics.add.sprite(2000, 300, "ground")
     // this.platforms.add(test);
@@ -192,7 +120,7 @@ export class GameScene extends Phaser.Scene {
 
       console.log("IM DIE");
       Platform.imDead = true;
-      this.gameEnd();
+      this.gameUIClass.gameEnd();
     });
 
     this.io.on(userInputEvents.win, () => {
@@ -205,12 +133,8 @@ export class GameScene extends Phaser.Scene {
       );
       this.youDieText.scrollFactorX = 0;
       this.youDieText.scrollFactorY = 0;
-      this.gameEnd();
+      this.gameUIClass.gameEnd();
     });
-
-    // this.io.on(userInputEvents.remove, (params: die) => {
-      // console.log(params);
-    // });
 
     this.io.on(userInputEvents.remove, (params: { id: number }) => {
       this.getGameObject(params.id).destroy();
@@ -229,9 +153,7 @@ export class GameScene extends Phaser.Scene {
     this.io.emit(gameSceneFromClient.sceneReady);
   }
 
-  gameEnd() {
-    this.gameUI.style.display = "block";
-  }
+
 
   update(time: number, delta: number): void {
     // console.log(this.input.activePointer);
@@ -248,8 +170,8 @@ export class GameScene extends Phaser.Scene {
   restartGame() {
     console.log("restartGAME");
     // this.statusText.text = "СТАТУС: НЕ ГОТОВ";
-    this.gameUI.style.display = "none";
-    this.setButtonReadyState(false);
+    this.gameUIClass.gameStart();
+    this.gameUIClass.setButtonReadyState(false);
 
     if (this.youDieText) {
       this.youDieText.destroy();
@@ -282,5 +204,34 @@ export class GameScene extends Phaser.Scene {
         -(this.cameras.main.height / 2) * 0.7
       );
     }
+  }
+
+  setPinch() {
+    // @ts-ignore
+    const pinch:any = this.rexGestures.add.pinch({
+      enable: true,
+      
+    })
+    pinch.on("pinch", (pinch1: any)=> {
+      console.log("pinch");
+      let zoom = this.cameras.main.zoom 
+      zoom *= pinch1.scaleFactor;
+      if (zoom > 0.5 && zoom < 1.2) {
+        this.cameras.main.setZoom(zoom)
+      }
+    })
+    this.input.on("wheel", (pointer: any, gameObjects: any, deltaX: number, deltaY: number, deltaZ :number) => {
+      console.log({deltaX, deltaY, deltaZ});
+      let zoom = this.cameras.main.zoom 
+      if (deltaY > 0) {
+        zoom -= 0.05
+      } else {
+        zoom += 0.05
+      }
+      if (zoom > 0.5 && zoom < 1.2) {
+        this.cameras.main.setZoom(zoom)
+      }
+
+    });
   }
 }

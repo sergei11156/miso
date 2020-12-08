@@ -36,13 +36,13 @@ export default class UserInputServer {
     });
     socket.on(userInputEvents.ready, () => {
       this.connection.ready = true;
-      console.log("player ready");
-
+      this.userConnectionManager.updateUsersList();
       if (this.userConnectionManager.isAllReady() && !scene.gameStarted) {
         scene.restartGame();
       }
     });
     socket.on(gameSceneFromClient.imNotReady, () => {
+      this.userConnectionManager.updateUsersList();
       this.connection.ready = false;
     });
     socket.on(platformEventsFromClient.platformDragToCloseZone, (params: platformDragToCloseZone) => {
