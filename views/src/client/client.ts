@@ -5,7 +5,7 @@ import RoomsScene from "./rooms/roomsScene";
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     height: window.innerHeight,
     width: window.innerWidth,
   },
@@ -33,6 +33,13 @@ export class MiscoGame extends Phaser.Game {
     this.events.on("ready", ()=> {
 
       this.scene.add("roomsScene", RoomsScene, true)
+    })
+    const changeSize = () => this.scale.resize(window.innerWidth, window.innerHeight);
+    window.addEventListener("resize", () => {
+      console.log("window resize");
+      
+      changeSize();
+      setTimeout(changeSize, 100)
     })
   }
 }
