@@ -53,6 +53,8 @@ export default class Dude extends GameObject {
   destroy() {
     Dude.dudes.delete(this);
     this.myName.destroy();
+    this.graphics.clear();
+    this.graphics.destroy();
     super.destroy();
     // this.closezone.destroy();
   }
