@@ -22,7 +22,7 @@ import GameUI from "./gameUI";
 import PointerManager from "./pointer/pointersManager";
 
 export class GameScene extends Phaser.Scene {
-  private cameraFollow?: GameObject;
+  private cameraFollow?: Dude;
   private gameObjects: GameObject[] = [];
   private io: SocketIOClient.Socket;
   statusText: Phaser.GameObjects.Text;
@@ -65,12 +65,18 @@ export class GameScene extends Phaser.Scene {
 
 
   preload(): void {
-    this.load.spritesheet("dude", "assets/dude.png", {
-      frameWidth: 32,
-      frameHeight: 48,
+    this.load.spritesheet("dude", "assets/newdude.svg", {
+      frameWidth: 96,
+      frameHeight: 50,
+      endFrame: 3
     });
 
     this.load.image("ground", "assets/platform.png");
+    this.load.spritesheet("fire", "assets/fireanimation.svg", {
+      frameWidth: 200,
+      frameHeight: 95,
+      endFrame: 4
+    });
     this.load.image("redzone", "assets/redZone.png");
     this.load.image("pointer", "assets/cursor.png");
 
@@ -121,7 +127,12 @@ export class GameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1,
     });
-
+    this.anims.create({
+      key: "fireAnimation",
+      frames: this.anims.generateFrameNumbers("fire", { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: -1,
+    });
     this.cameras.main.setBounds(0, 0, 20000, 2e6);
     this.physics.world.setBounds(0, 0, 20000, 2e6);
 
@@ -146,6 +157,7 @@ export class GameScene extends Phaser.Scene {
       );
     }
     Dude.updateAnims();
+    Platform.animateAllPlatforms();
   }
   sendPointer(x: number, y: number) {
     this.io.emit(gameSceneFromClient.pointerPosition, {x, y})

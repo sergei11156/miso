@@ -15,7 +15,7 @@ export default class PlatformManager {
 
   update(delta: number, dudes: DudeServer[]) {
     this.platformTimer += delta;
-    if (this.platformTimer > 10000) {
+    if (this.platformTimer > 1000) {
       this.platformTimer = 0;
       for (const dude of dudes) {
         this.spawnPlatform(dude);
@@ -46,7 +46,7 @@ export default class PlatformManager {
     let platformServer = new PlatformServer(this.platforms.scene, platformX, platformY);
 
     this.platforms.add(platformServer);
-    platformServer.body.setSize(150, 66);
+    platformServer.body.setSize(190, 65);
     
     const createPlatformParam: platformCreate = {
       id: platformServer.id,

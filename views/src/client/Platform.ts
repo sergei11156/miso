@@ -21,6 +21,14 @@ export default class Platform extends GameObject {
   static io: any;
   static platforms: Platform[] = [];
   static imDead: boolean = false;
+  static defaultYOffset = 60;
+  static defaultXOffset = 5;
+
+  private _dragging = false;
+  get dragging() {
+    return this._dragging;
+  }
+  private draggingOnServerSide: boolean = false;
 
   static add(scene: GameScene, params: platformCreate, group: Phaser.Physics.Arcade.Group): any {
     let platform = new Platform(scene, params, this.io);
@@ -40,7 +48,7 @@ export default class Platform extends GameObject {
         if (platform.dragging) {
           throw new Error("Platform already dragging on client side");
         }
-
+        platform.draggingOnServerSide = true;
         platform.startDragging();
       } catch (error) {
         console.error(error);
@@ -54,6 +62,7 @@ export default class Platform extends GameObject {
           throw new Error("Platform not dragging on client side");
         }
 
+        platform.draggingOnServerSide = false;
         platform.stopDragging();
       } catch (error) {
         console.error(error);
@@ -67,7 +76,7 @@ export default class Platform extends GameObject {
           throw new Error("Platform not dragging on client side");
         }
 
-        platform.dragTo(params.x, params.y);
+        platform.dragTo(params.x - Platform.defaultXOffset, params.y - Platform.defaultYOffset);
       } catch (error) {
         console.error(error);
       }
@@ -82,22 +91,19 @@ export default class Platform extends GameObject {
     });
   }
 
-  private _dragging = false;
-  get dragging() {
-    return this._dragging;
-  }
+
 
   constructor(
     scene: GameScene,
     params: platformCreate,
     io: SocketIOClient.Socket
   ) {
-    super(scene, params.id, params.x, params.y, "ground");
+    super(scene, params.id, params.x - Platform.defaultXOffset, params.y - Platform.defaultYOffset, "fire");
     this.sprite.setInteractive();
     scene.input.setDraggable(this.sprite);
 
     this.sprite.on("dragstart", (pointer: Phaser.Input.Pointer) => {
-      if (this.dragging || Platform.imDead) {
+      if (this.dragging || Platform.imDead || this.draggingOnServerSide) {
         return;
       }
 
@@ -115,7 +121,7 @@ export default class Platform extends GameObject {
     });
 
     this.sprite.on("drag", (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-      if(!this.dragging) return;
+      if(!this.dragging || this.draggingOnServerSide) return;
       if(Platform.imDead) return;
       if (this.checkIsPointerIsInCloseZone(pointer)) {
         this.whenDraggedToCloseZone();
@@ -125,14 +131,17 @@ export default class Platform extends GameObject {
 
       const dragNewPos: PlatformDragging = {
         id: this.id,
-        x: this.sprite.x,
-        y: this.sprite.y,
+        x: this.sprite.x + Platform.defaultXOffset,
+        y: this.sprite.y + Platform.defaultYOffset,
       };
 
       io.emit(userInputEvents.dragging, dragNewPos);
     });
 
     this.sprite.on("dragend", () => {
+      if (this.draggingOnServerSide) {
+        return;
+      }
       this.stopDragging();
       io.emit(userInputEvents.dragEnd, { id: this.id });
     });
@@ -177,5 +186,17 @@ export default class Platform extends GameObject {
   static reset() {
     this.platforms = [];
 
+  }
+
+  static animateAllPlatforms() {
+    for (const platform of this.platforms) {
+      platform.animatePlatform()
+    }
+  }
+  animatePlatform() {
+    if (!this.sprite.anims) {
+      return;
+    }
+    this.sprite.anims.play("fireAnimation", true);
   }
 }
