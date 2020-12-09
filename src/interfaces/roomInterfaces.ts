@@ -1,9 +1,11 @@
 export enum roomFromServerEvents {
   update = "updateRoom",
   youConnectedTo = "youConnectedTo",
+  roomNotExist = "roomNotExist"
 }
 export enum roomFromClientEvents {
   join = "join",
+  joinAnyRoom = "joinAnyRoom"
 }
 
 export interface updateRoomData {

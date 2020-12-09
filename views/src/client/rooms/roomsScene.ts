@@ -20,6 +20,7 @@ export default class RoomsScene extends Phaser.Scene {
   inputName: HTMLInputElement;
   submitButton: HTMLFormElement;
   roomName: string;
+  inputNameOfRoom: HTMLInputElement;
 
   init() {
     this.io = socket_io();
@@ -33,17 +34,20 @@ export default class RoomsScene extends Phaser.Scene {
     this.inputNameContainer = document.querySelector(".startScreenContainer");
     this.inputNameContainer.style.display = "flex";
     this.inputName = document.getElementById("inputYourName") as HTMLInputElement;
+    this.inputNameOfRoom = document.getElementById("inputNameOfRoom") as HTMLInputElement;
+    this.io.on(roomFromServerEvents.roomNotExist, (name: string) => {
+      this.inputNameOfRoom.setCustomValidity("Комнаты " + name + " не существует!");
+      this.submitButton.requestSubmit();
+    })
+    this.inputNameOfRoom.addEventListener("input", () => this.inputNameOfRoom.setCustomValidity(""))
   }
   joinSomeRoom() {
-    for (const key in this.rooms) {
-      if (Object.prototype.hasOwnProperty.call(this.rooms, key)) {
-        const room = this.rooms[key];
-        if (room.isWaiting) {
-          this.joinRoom(room.key)
-          return;
-        }
-      }
+    if(this.inputNameOfRoom.value) {
+      console.log(this.inputNameOfRoom);
+      this.joinRoom(this.inputNameOfRoom.value);
+      return;
     }
+    this.joinAnyRoom();
   }
   preload() {}
 
@@ -94,7 +98,10 @@ export default class RoomsScene extends Phaser.Scene {
     };
     this.io.emit(roomFromClientEvents.join, joinParams);
   }
-
+  joinAnyRoom(): void {
+    const name = this.inputName.value;
+    this.io.emit(roomFromClientEvents.joinAnyRoom, name);
+  }
   openGameScene() {
     this.isRoomsEventsAreWork = false;
     this.inputNameContainer.style.display = "none";

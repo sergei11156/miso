@@ -34,9 +34,15 @@ export default class RoomManager {
           
           room.addUser(socket, params.name);
         } catch (error) {
+          socket.emit(roomFromServerEvents.roomNotExist, params.key)
           console.error(error);
         }
       });
+      socket.on(roomFromClientEvents.joinAnyRoom, (name: string) => {
+        const len = this.rooms.length;
+        const room = Phaser.Math.Between(0, len-1);
+        this.rooms[room].addUser(socket, name);
+      })
     });
   }
 
