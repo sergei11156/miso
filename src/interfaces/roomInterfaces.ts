@@ -20,4 +20,5 @@ export interface joinRoom {
 }
 export interface youConnectedTo{
   key: string;
+  isGameStarted: boolean;
 }

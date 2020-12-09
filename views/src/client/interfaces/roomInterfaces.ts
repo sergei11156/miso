@@ -18,3 +18,8 @@ export interface joinRoom {
   key: string;
   name: string;
 }
+
+export interface youConnectedTo{
+  key: string;
+  isGameStarted: boolean;
+}

@@ -28,7 +28,7 @@ export default class GameUI {
   gameEndList: HTMLUListElement;
   onGameStartAgainButtonClick: () => void;
 
-  constructor(io: SocketIOClient.Socket, scene: GameScene, roomName: string) {
+  constructor(io: SocketIOClient.Socket, scene: GameScene, roomName: string, isGameStarted: boolean) {
     this.io = io;
     this.scene = scene;
     this.gameUI = document.querySelector(".gameUi");
@@ -108,12 +108,16 @@ export default class GameUI {
     });
 
     this.onGameStartAgainButtonClick = () => {
-      this.setButtonReadyState(true);
-      this.io.emit(userInputEvents.ready);
-      console.log("all should closed");
-      
       this.closeGameEndUI();
+      setTimeout(() => {
+        this.setButtonReadyState(true);
+        this.io.emit(userInputEvents.ready);
+      }, 700);
     };
+    
+    if (isGameStarted) {
+      this.openGameEndUI();
+    }
   }
   userListWithPointUpdate(usersList: userList) {
     console.log(usersList);
@@ -132,25 +136,34 @@ export default class GameUI {
     });
     for (const user of users) {
       const userScoreText = document.createElement("li");
+      const nameAndScore = document.createElement("span");
       let text = user.name;
       if (user.points) {
         text = user.points + ". " + text;
       } else {
         text = "?? " + text;
       }
-      userScoreText.textContent = text;
+      nameAndScore.textContent = text;
 
+      userScoreText.appendChild(nameAndScore);
+      userScoreText.appendChild(this.generateStatusSpan(user.statusReady))
       this.gameEndList.appendChild(userScoreText);
     }
 
     if (usersList.canStartNewGame) {
       this.gameEndBackToTheGame.classList.add("readyToStart");
       this.gameEndBackToTheGame.classList.remove("notReadyToStart");
-      this.gameEndBackToTheGame.addEventListener("click", this.onGameStartAgainButtonClick)
+      this.gameEndBackToTheGame.addEventListener(
+        "click",
+        this.onGameStartAgainButtonClick
+      );
     } else {
       this.gameEndBackToTheGame.classList.add("notReadyToStart");
       this.gameEndBackToTheGame.classList.remove("readyToStart");
-      this.gameEndBackToTheGame.removeEventListener("click", this.onGameStartAgainButtonClick)
+      this.gameEndBackToTheGame.removeEventListener(
+        "click",
+        this.onGameStartAgainButtonClick
+      );
     }
   }
 
@@ -205,14 +218,7 @@ export default class GameUI {
       let nameContainer = document.createElement("span");
       nameContainer.textContent = user.name;
       liTextContainer.appendChild(nameContainer);
-      let statusContainer = document.createElement("span");
-      if (user.statusReady) {
-        statusContainer.textContent = "готов";
-        statusContainer.classList.add("ready");
-      } else {
-        statusContainer.textContent = "не готов";
-        statusContainer.classList.add("notready");
-      }
+      let statusContainer = this.generateStatusSpan(user.statusReady);
       liTextContainer.appendChild(statusContainer);
       li.appendChild(liTextContainer);
       this.usersUlElement.appendChild(li);
@@ -225,5 +231,23 @@ export default class GameUI {
       this.notEnouthPlayersText = false;
       this.underUsers.textContent = "";
     }
+  }
+
+  generateStatusSpan(status: "play" | "ready" | "notready") {
+    let statusContainer = document.createElement("span");
+    switch (status) {
+      case "play":
+        statusContainer.textContent = "играет";
+        statusContainer.classList.add("ready");
+        break;
+      case "ready":
+        statusContainer.textContent = "готов";
+        statusContainer.classList.add("ready");
+        break;
+      case "notready":
+        statusContainer.textContent = "не готов";
+        statusContainer.classList.add("notready");
+    }
+    return statusContainer
   }
 }

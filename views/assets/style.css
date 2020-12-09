@@ -133,3 +133,18 @@ body {
   background-color: #21ce10;
   color: #000000;
 }
+.gameEnd .usersListWithScore {
+    list-style: none;
+    padding: 0;
+}
+.gameEnd .usersListWithScore li {
+  display: flex;
+  justify-content: space-between;
+}
+
+.gameEnd .usersListWithScore li .ready {
+  color: #41e320;
+}
+.gameEnd .usersListWithScore li .notready {
+  color: #c80707;
+}

@@ -29,6 +29,7 @@ export default class DudeServer extends GameObject {
       xAxis,
       dudeManager.startPlayerYPosition
     );
+    this.setActive(false);
     this._xAxis = xAxis;
     this.connection = connection;
     this.dudeManager = dudeManager;

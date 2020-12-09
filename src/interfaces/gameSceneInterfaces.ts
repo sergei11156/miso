@@ -21,7 +21,7 @@ export interface youDieWithScore {
 }
 
 export interface userList {
-  users: Array<{ id: number; name: string; points?: number; statusReady?: boolean }>;
+  users: Array<{ id: number; name: string; points?: number; statusReady: "ready" | "notready" | "play" }>;
   canStartNewGame?: boolean;
 }
 

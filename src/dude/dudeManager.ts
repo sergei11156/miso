@@ -12,6 +12,7 @@ export default class DudeManager {
   gameStop: () => void;
   platformManager: PlatformManager;
   deadDudes = 0;
+  dudesLengthOnGameStart: number;
 
   add(connection: userConnection) {
     const newDude = new DudeServer(
@@ -61,6 +62,7 @@ export default class DudeManager {
   startGame() {
     let xAxisOffset = 0;
     this.deadDudes = 0;
+    this.dudesLengthOnGameStart = this.dudes.getLength();
     this.dudes.children.each((dude: DudeServer) => {
       dude.gameStart(xAxisOffset);
       xAxisOffset += this.distanceBetweenDudes;
@@ -101,12 +103,12 @@ export default class DudeManager {
     this.softArrangeDudes()
   }
   softArrangeDudes() {
-    let dudes = this.dudes.children.getArray();
+    let dudes = this.dudes.children.getArray() as DudeServer[];
     let aliveDudes: DudeServer[] = [];
     for (const dudeId in dudes) {
       if (Object.prototype.hasOwnProperty.call(dudes, dudeId)) {
         const dude = dudes[dudeId];
-        if(dude.active) {
+        if(dude.active && dude.connection.ready == "play") {
           aliveDudes.push(dude as DudeServer);
         }
       }
@@ -121,7 +123,10 @@ export default class DudeManager {
   }
   countAlive() {
     let count = 0;
-    this.dudes.children.each((gmObj) => {
+    this.dudes.children.each((gmObj: DudeServer) => {
+      if (gmObj.connection.ready != "play") {
+        return;
+      }
       if (gmObj.active) {
         count++;
       }
@@ -148,7 +153,8 @@ export default class DudeManager {
   }
 
   imDeadGetMyScore() {
-    const totalDudes = this.dudes.getLength();
+    const totalDudes = this.dudesLengthOnGameStart;
+
     const score = totalDudes - this.deadDudes;
     this.deadDudes++;
     return score;

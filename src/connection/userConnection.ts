@@ -6,7 +6,7 @@ import UserInputServer from "./userInputServer";
 import userOutput from "./userOutput";
 
 export default class userConnection {
-  ready = false;
+  ready: "ready" | "notready" | "play";
   private room: string;
   private socket: SocketIO.Socket;
   send: userOutput;
@@ -26,6 +26,7 @@ export default class userConnection {
     name: string,
     id: number
   ) {
+    this.ready = "notready";
     this.id = id;
     this.room = roomName;
     this.socket = socket;

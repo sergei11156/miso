@@ -61,6 +61,7 @@ export default class userConnectionManager {
       });
     }
     this.io.to(this.room).emit(gameSceneFromServer.userList, params);
+    this.updateUsersListWithScore();
   }
   gameEndResetParams() {
     this.setAllToNotReady();
@@ -69,9 +70,10 @@ export default class userConnectionManager {
   gameStartResetOldParams(){
     this.io.to(this.room).emit(userInputEvents.restartGame);
     for (const conn of this.connections) {
+      conn.ready = "play";
       conn.send.score = undefined;
     }
-    
+
   }
   updateUsersListWithScore() {
     
@@ -84,6 +86,7 @@ export default class userConnectionManager {
         id: conn.id,
         name: conn.userName,
         points: conn.score,
+        statusReady: conn.ready
       });
     }
     
@@ -98,7 +101,7 @@ export default class userConnectionManager {
     }
     let result = true;
     for (const user of this.connections) {
-      if (!user.ready) {
+      if (user.ready != "ready") {
         result = false;
       }
     }
@@ -107,7 +110,9 @@ export default class userConnectionManager {
 
   setAllToNotReady() {
     for (const user of this.connections) {
-      user.ready = false;
+      if (user.ready == "play") {
+        user.ready = "notready";
+      }
     }
     this.updateUsersList();
   }

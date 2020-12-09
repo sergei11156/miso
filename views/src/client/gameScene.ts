@@ -36,7 +36,7 @@ export class GameScene extends Phaser.Scene {
   gameStarted: boolean = false;
   pointerManager: PointerManager;
 
-  init(params: { io: SocketIOClient.Socket; roomName: string }) {
+  init(params: { io: SocketIOClient.Socket; roomName: string, isGameStarted: boolean }) {
     this.io = params.io;
     this.redzones = this.physics.add.group();
     this.platforms = this.physics.add.group();
@@ -59,7 +59,7 @@ export class GameScene extends Phaser.Scene {
       }
     );
 
-    this.gameUIClass = new GameUI(this.io, this, params.roomName);
+    this.gameUIClass = new GameUI(this.io, this, params.roomName, params.isGameStarted);
     this.pointerManager = new PointerManager(this, this.io) 
   }
 

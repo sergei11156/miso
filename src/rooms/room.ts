@@ -31,14 +31,12 @@ export default class Room {
   }
 
   addUser(socket: SocketIO.Socket, name: string) {
-    if (this.roomScene.gameStarted) {
-      return;
-    }
     socket.leave("wait");
     socket.join(this.key);
     this.playersCount++;
     const joinObject: youConnectedTo = {
-      key: this.key
+      key: this.key,
+      isGameStarted: this.roomScene.gameStarted
     }
     socket.emit(roomFromServerEvents.youConnectedTo, joinObject)
     this.sendUpdateRoom();
@@ -74,7 +72,7 @@ export default class Room {
 
     let howManyReadyPlayers = 0;
     for (const connection of this.roomScene.userConnectionManager.connections) {
-      if (connection.ready) howManyReadyPlayers++;
+      if (connection.ready == "ready") howManyReadyPlayers++;
     }
 
     if (this.playersCount/2 < howManyReadyPlayers) {

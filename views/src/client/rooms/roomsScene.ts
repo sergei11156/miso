@@ -5,6 +5,7 @@ import {
   roomFromClientEvents,
   roomFromServerEvents,
   updateRoomData,
+  youConnectedTo,
 } from "../interfaces/roomInterfaces";
 import { clientEvents } from "../interfaces/interfaces";
 import { GameScene } from "../gameScene";
@@ -59,9 +60,9 @@ export default class RoomsScene extends Phaser.Scene {
 
     this.io.emit(clientEvents.init);
 
-    this.io.on(roomFromServerEvents.youConnectedTo, (params: joinRoom) => {
+    this.io.on(roomFromServerEvents.youConnectedTo, (params: youConnectedTo) => {
       this.roomName = params.key;
-      this.openGameScene();
+      this.openGameScene(params.isGameStarted);
     });
   }
 
@@ -102,10 +103,10 @@ export default class RoomsScene extends Phaser.Scene {
     const name = this.inputName.value;
     this.io.emit(roomFromClientEvents.joinAnyRoom, name);
   }
-  openGameScene() {
+  openGameScene(isGameStarted: boolean) {
     this.isRoomsEventsAreWork = false;
     this.inputNameContainer.style.display = "none";
-    this.scene.add("gameScene", GameScene, true, { io: this.io, roomName: this.roomName });
+    this.scene.add("gameScene", GameScene, true, { io: this.io, roomName: this.roomName, isGameStarted});
     this.scene.remove("roomsScene");
   }
 }

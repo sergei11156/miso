@@ -43,7 +43,7 @@ export default class UserInputServer {
       this.platformManager.dragging(params, socket);
     });
     socket.on(userInputEvents.ready, () => {
-      this.connection.ready = true;
+      this.connection.ready = "ready";
       this.userConnectionManager.updateUsersList();
       if (this.userConnectionManager.isAllReady() && !scene.gameStarted) {
         scene.restartGame();
@@ -52,7 +52,7 @@ export default class UserInputServer {
       }
     });
     socket.on(gameSceneFromClient.imNotReady, () => {
-      this.connection.ready = false;
+      this.connection.ready = "notready";
       this.userConnectionManager.updateUsersList();
       this.userConnectionManager.chcekIfRoomCanStart();
     });
@@ -74,6 +74,6 @@ export default class UserInputServer {
         this.connection.send.pointer(sendObject);
       }
     );
-    
+
   }
 }
