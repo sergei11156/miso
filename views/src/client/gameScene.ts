@@ -19,6 +19,7 @@ import {
 import Pointer from "./pointer";
 import RoomsScene from "./rooms/roomsScene";
 import GameUI from "./gameUI";
+import PointerManager from "./pointer/pointersManager";
 
 export class GameScene extends Phaser.Scene {
   private cameraFollow?: GameObject;
@@ -33,6 +34,7 @@ export class GameScene extends Phaser.Scene {
   ready: boolean = false;
   gameUIClass: GameUI;
   gameStarted: boolean = false;
+  pointerManager: PointerManager;
 
   init(params: { io: SocketIOClient.Socket; roomName: string }) {
     this.io = params.io;
@@ -57,7 +59,8 @@ export class GameScene extends Phaser.Scene {
       }
     );
 
-    this.gameUIClass = new GameUI(this.io, this, params.roomName); 
+    this.gameUIClass = new GameUI(this.io, this, params.roomName);
+    this.pointerManager = new PointerManager(this, this.io) 
   }
 
 
@@ -133,13 +136,19 @@ export class GameScene extends Phaser.Scene {
   update(time: number, delta: number): void {
     // console.log(this.input.activePointer);
     // this.pointer.setPosition(this, this.input.activePointer.worldX, this.input.activePointer.worldY, delta);
-    Dude.isPointerInCloseZone(
-      new Phaser.Math.Vector2(
-        this.input.activePointer.worldX,
-        this.input.activePointer.worldY
-      )
-    );
+    if (this.gameStarted) {
+      this.sendPointer(this.input.activePointer.worldX, this.input.activePointer.worldY);
+      Dude.isPointerInCloseZone(
+        new Phaser.Math.Vector2(
+          this.input.activePointer.worldX,
+          this.input.activePointer.worldY
+        )
+      );
+    }
     Dude.updateAnims();
+  }
+  sendPointer(x: number, y: number) {
+    this.io.emit(gameSceneFromClient.pointerPosition, {x, y})
   }
 
   restartGame() {
@@ -189,7 +198,6 @@ export class GameScene extends Phaser.Scene {
       
     })
     pinch.on("pinch", (pinch1: any)=> {
-      console.log("pinch");
       let zoom = this.cameras.main.zoom 
       zoom *= pinch1.scaleFactor;
       if (zoom > 0.5 && zoom < 1.2) {
@@ -197,7 +205,6 @@ export class GameScene extends Phaser.Scene {
       }
     })
     this.input.on("wheel", (pointer: any, gameObjects: any, deltaX: number, deltaY: number, deltaZ :number) => {
-      console.log({deltaX, deltaY, deltaZ});
       let zoom = this.cameras.main.zoom 
       if (deltaY > 0) {
         zoom -= 0.05

@@ -7,6 +7,7 @@ import PlatformManager from "../platforms/platformManager";
 import userConnection from "./userConnection";
 import Room from "../rooms/room";
 import DudeServer from "../dude/dudeServer";
+import { userInputEvents } from "../interfaces/interfaces";
 
 export default class userConnectionManager {
   connections: Set<userConnection> = new Set();
@@ -66,9 +67,11 @@ export default class userConnectionManager {
     this.updateUsersListWithScore();
   }
   gameStartResetOldParams(){
+    this.io.to(this.room).emit(userInputEvents.restartGame);
     for (const conn of this.connections) {
       conn.send.score = undefined;
     }
+    
   }
   updateUsersListWithScore() {
     

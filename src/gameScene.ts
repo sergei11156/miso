@@ -101,7 +101,6 @@ export class GameScene extends Phaser.Scene {
     this.physics.resume();
     this.userConnectionManager.gameStartResetOldParams();
     this.forceGameStartTimerOff();
-    this.io.emit(userInputEvents.restartGame);
     this.platformManager.clear();
     this._gameStarted = true;
     this.platformManager.gameStarted = true;

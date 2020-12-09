@@ -1,6 +1,7 @@
 export enum gameSceneFromClient {
   sceneReady = "sceneReady",
   imNotReady = "imNotReady",
+  pointerPosition = "pointerPosition"
 }
 export enum gameSceneFromServer {
   gameStartTimerOn = "gameStartTimerOn",
@@ -9,7 +10,10 @@ export enum gameSceneFromServer {
   userList = "userList",
   youDieWithScore = "youDieWithScore",
   victory = "victory",
-  userListWithPoints = "userListWithPoint"
+  userListWithPoints = "userListWithPoint",
+  updatePointer = "updatePointer",
+  createPointer = "createPointer",
+  removePointer = "removePointer"
 }
 
 export interface youDieWithScore {
@@ -18,5 +22,15 @@ export interface youDieWithScore {
 
 export interface userList {
   users: Array<{ id: number; name: string; points?: number; statusReady?: boolean }>;
-  canStartNewGame?: boolean
+  canStartNewGame?: boolean;
+}
+
+export interface pointerPosition {
+  x:number;
+  y: number;  
+}
+export interface updatePointerPosition {
+  id:number;
+  x:number;
+  y: number;
 }

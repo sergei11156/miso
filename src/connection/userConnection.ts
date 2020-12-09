@@ -29,9 +29,10 @@ export default class userConnection {
     this.id = id;
     this.room = roomName;
     this.socket = socket;
-    this.send = new userOutput(socket, userConnectionManager, roomName);
-    this.userInput = new UserInputServer(socket, scene, platformManager, userConnectionManager, this);
     this.userName = name;
+
+    this.send = new userOutput(socket, userConnectionManager, roomName, name, id);
+    this.userInput = new UserInputServer(socket, scene, platformManager, userConnectionManager, this);
   }
 
   setDude(dude: DudeServer) {

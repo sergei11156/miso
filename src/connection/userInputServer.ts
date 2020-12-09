@@ -7,8 +7,15 @@ import { GameScene } from "../gameScene";
 import PlatformManager from "../platforms/platformManager";
 import userConnectionManager from "./userConnectionManager";
 import userConnection from "./userConnection";
-import { platformDragToCloseZone, platformEventsFromClient } from "../interfaces/platformInterfaces";
-import { gameSceneFromClient } from "../interfaces/gameSceneInterfaces";
+import {
+  platformDragToCloseZone,
+  platformEventsFromClient,
+} from "../interfaces/platformInterfaces";
+import {
+  gameSceneFromClient,
+  pointerPosition,
+  updatePointerPosition,
+} from "../interfaces/gameSceneInterfaces";
 
 export default class UserInputServer {
   platformManager: PlatformManager;
@@ -25,6 +32,7 @@ export default class UserInputServer {
     this.platformManager = platformManager;
     this.userConnectionManager = userConnectionManager;
     this.connection = connection;
+
     socket.on(userInputEvents.dragStart, (params: PlatformDragStartOrEnd) => {
       this.platformManager.dragStart(params, socket);
     });
@@ -48,8 +56,24 @@ export default class UserInputServer {
       this.userConnectionManager.updateUsersList();
       this.userConnectionManager.chcekIfRoomCanStart();
     });
-    socket.on(platformEventsFromClient.platformDragToCloseZone, (params: platformDragToCloseZone) => {
-      this.platformManager.destroyPlatform(params, this.connection);
-    })
+    socket.on(
+      platformEventsFromClient.platformDragToCloseZone,
+      (params: platformDragToCloseZone) => {
+        this.platformManager.destroyPlatform(params, this.connection);
+      }
+    );
+
+    socket.on(
+      gameSceneFromClient.pointerPosition,
+      (params: pointerPosition) => {
+        let sendObject: updatePointerPosition = {
+          id: this.connection.id,
+          x: params.x,
+          y: params.y
+        };
+        this.connection.send.pointer(sendObject);
+      }
+    );
+    
   }
 }
