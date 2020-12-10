@@ -119,6 +119,10 @@ export default class DudeServer extends GameObject {
   }
 
   youWin() {
+    this.setVelocityY(0);
+    this.setVelocityX(0);
+    this.setActive(false);
+    
     this.connection.send.win();
     // this.socket.emit(userInputEvents.win);
   }
