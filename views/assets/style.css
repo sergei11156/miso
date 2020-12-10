@@ -237,3 +237,23 @@ body {
   }
 }
 
+.roomName {
+  cursor: pointer;
+}
+.roomName::after {
+  content: " ";
+  display: inline-block;
+  background: url(/assets/copy.svg) no-repeat;
+  width: 14px;
+  height: 14px;
+  background-size: contain;
+  margin-left: 10px;
+}
+.underUsers {
+  margin-bottom: 5px;
+}
+
+.roomName.copied::after {
+  content: "Скопировано!";
+  background: none;
+}

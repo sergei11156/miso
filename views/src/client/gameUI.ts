@@ -12,7 +12,7 @@ import RoomsScene from "./rooms/roomsScene";
 
 export default class GameUI {
   gameUI: HTMLDivElement;
-  roomNameElement: HTMLDivElement;
+  roomNameElement: NodeListOf<HTMLDivElement>;
   usersUlElement: HTMLUListElement;
   readyButton: HTMLButtonElement;
   quitRoomButton: NodeListOf<HTMLButtonElement>;
@@ -33,7 +33,16 @@ export default class GameUI {
     this.scene = scene;
     this.gameUI = document.querySelector(".gameUi");
     this.gameUI.style.display = "block";
-    this.roomNameElement = document.querySelector(".roomName");
+    this.roomNameElement = document.querySelectorAll(".roomName");
+
+    this.roomNameElement.forEach((e) => {
+      e.textContent = "Комната: " + roomName;
+      e.addEventListener("click", () => {
+        copyTextToClipboard(roomName);
+        e.classList.toggle("copied");
+      });
+    });
+
     this.usersUlElement = document.querySelector(".users");
     this.readyButton = document.querySelector(".readyButton");
     this.quitRoomButton = document.querySelectorAll(".quitRoomButton");
@@ -50,7 +59,6 @@ export default class GameUI {
       ".backToTheGame"
     );
 
-    this.roomNameElement.textContent = "Комната: " + roomName;
     this.setButtonReadyState(false);
     this.readyButton.addEventListener("click", () => {
       if (!scene.ready) {
@@ -250,4 +258,41 @@ export default class GameUI {
     }
     return statusContainer
   }
+}
+
+
+
+function fallbackCopyTextToClipboard(text: string) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  
+  // Avoid scrolling to bottom
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.position = "fixed";
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    console.log('Fallback: Copying text command was ' + msg);
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+  }
+
+  document.body.removeChild(textArea);
+}
+function copyTextToClipboard(text: string) {
+  if (!navigator.clipboard) {
+    fallbackCopyTextToClipboard(text);
+    return;
+  }
+  navigator.clipboard.writeText(text).then(function() {
+    console.log('Async: Copying to clipboard was successful!');
+  }, function(err) {
+    console.error('Async: Could not copy text: ', err);
+  });
 }
