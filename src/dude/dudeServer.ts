@@ -35,7 +35,7 @@ export default class DudeServer extends GameObject {
     this.dudeManager = dudeManager;
     connection.setDude(this)
     dudeManager.dudes.add(this, true);
-    this.body.setSize(80, 48);
+    this.body.setSize(60, 48);
     this.setCollideWorldBounds(false);
   }
 

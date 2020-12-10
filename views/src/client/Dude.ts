@@ -10,6 +10,7 @@ export default class Dude extends GameObject {
   myName: Phaser.GameObjects.Text;
   playerDude: boolean = false;
   scene: GameScene;
+  static defaultXOffset = 18;
   // closezone: Phaser.Physics.Arcade.Sprite;
   // private closezone:
   constructor(
@@ -17,7 +18,7 @@ export default class Dude extends GameObject {
     params: createDude,
     redzone: Phaser.Physics.Arcade.Group
   ) {
-    super(scene, params.id, params.x, params.y, "dude");
+    super(scene, params.id, params.x + Dude.defaultXOffset, params.y, "dude");
     this.scene = scene;
     const graphics = scene.add.graphics();
     this.graphics = graphics;
@@ -45,7 +46,7 @@ export default class Dude extends GameObject {
   }
 
   updatePos(x: number, y: number) {
-    super.updatePos(x, y);
+    super.updatePos(x + Dude.defaultXOffset, y);
     // this.closezone.setPosition(x, y)
   }
   updateAnimations() {

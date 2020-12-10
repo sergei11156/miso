@@ -25,6 +25,7 @@ export default class Platform extends GameObject {
   static defaultXOffset = 5;
 
   private _dragging = false;
+  graphics: Phaser.GameObjects.Graphics;
   get dragging() {
     return this._dragging;
   }
@@ -49,6 +50,7 @@ export default class Platform extends GameObject {
           throw new Error("Platform already dragging on client side");
         }
         platform.draggingOnServerSide = true;
+        platform.graphics.clear();
         platform.startDragging();
       } catch (error) {
         console.error(error);
@@ -102,6 +104,27 @@ export default class Platform extends GameObject {
     this.sprite.setInteractive();
     scene.input.setDraggable(this.sprite);
 
+
+    const graphics = scene.add.graphics();
+    this.graphics = graphics;
+
+    this.sprite.on("pointerover", (pointer: Phaser.Input.Pointer) => {
+      this.graphics.clear();
+      if (this.draggingOnServerSide || this.dragging || Platform.imDead) {
+        return;
+      }
+      if (this.checkIsPointerIsInCloseZone(pointer)) {
+        return;
+      }
+      const platformXY = this.sprite.getTopLeft();
+      this.graphics.fillStyle(0x00FF00, .5)
+      this.graphics.fillRect(platformXY.x, platformXY.y, this.sprite.width, this.sprite.height);
+    });
+
+    this.sprite.on("pointerout", () => {
+      this.graphics.clear();
+    });
+
     this.sprite.on("dragstart", (pointer: Phaser.Input.Pointer) => {
       if (this.dragging || Platform.imDead || this.draggingOnServerSide) {
         return;
@@ -110,7 +133,7 @@ export default class Platform extends GameObject {
       if (this.checkIsPointerIsInCloseZone(pointer)) {
         return;
       }
-
+      this.graphics.clear();
       this.startDragging();
 
       const dragStart: PlatformDragStartOrEnd = {
