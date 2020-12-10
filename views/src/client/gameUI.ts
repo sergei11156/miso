@@ -39,7 +39,10 @@ export default class GameUI {
       e.textContent = "Комната: " + roomName;
       e.addEventListener("click", () => {
         copyTextToClipboard(roomName);
-        e.classList.toggle("copied");
+        e.classList.add("copied");
+        setTimeout(() => {
+          e.classList.remove("copied")
+        }, 1000)
       });
     });
 

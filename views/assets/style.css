@@ -256,4 +256,5 @@ body {
 .roomName.copied::after {
   content: "Скопировано!";
   background: none;
+  width: unset;
 }

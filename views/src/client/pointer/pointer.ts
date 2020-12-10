@@ -7,9 +7,11 @@ export default class PlayerPointer {
   constructor(scene: GameScene, name: string) {
     this.pointer = scene.physics.add.sprite(0, 0, "pointer");
     this.name = name;
-    this.text = scene.add.text(0, 0, name)
-    this.text.setColor("#000000")
-    this.text.alpha = .5;
+    this.text = scene.add.text(0, 0, name, {
+      color: '#000000',
+      fontFamily: "Arial, Helvetica, sans-serif"
+    })
+    this.pointer.alpha = .5;
     this.text.setDepth(5);
     this.pointer.setDepth(5);
   }

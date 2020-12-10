@@ -25,11 +25,13 @@ export default class Dude extends GameObject {
     this.graphics = graphics;
     this.graphics.alpha = 0;
     this.circle = new Phaser.Geom.Circle(params.x, params.y, 200);
-    this.myName = scene.add.text(params.x, params.y, params.name);
+    this.myName = scene.add.text(params.x, params.y, params.name, {
+      fontFamily: "Arial, Helvetica, sans-serif"
+    });
     console.log(params.name);
 
     if (params.cameraFollow) {
-      this.myName.setColor("#00FF08");
+      this.myName.setColor("#119a03");
     } else {
       this.myName.setColor("#E43434");
     }
