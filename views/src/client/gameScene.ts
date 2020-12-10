@@ -132,42 +132,9 @@ export class GameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1,
     });
-    this.anims.create({
-      key: "soundPictureOff",
-      frames: this.anims.generateFrameNumbers("soundTrigger", { start: 0, end: 1 }),
-    });
-    this.anims.create({
-      key: "soundPictureOn",
-      frames: this.anims.generateFrameNumbers("soundTrigger", { start: 1, end: 0 }),
-    });
+
     this.cameras.main.setBounds(0, 0, 20000, 2e6);
     this.physics.world.setBounds(0, 0, 20000, 2e6);
-
-    const xCord = this.cameras.main.width - 150 * .2;
-    const soundTrigger = this.add.sprite(xCord,  125 * .2, "soundTrigger")
-    soundTrigger.setScale(.2);
-    soundTrigger.scrollFactorX = 0;
-    soundTrigger.scrollFactorY = 0;
-
-    
-    soundTrigger.setInteractive();
-    soundTrigger.on("pointerdown", () => {
-      if (this.soundMute) {
-        this.soundMute = false;
-        soundTrigger.anims.nextFrame()
-        soundTrigger.anims.play("soundPictureOn")
-        if (this.gameStarted) {
-          this.windSound.play({ loop: true, volume: 0.8 });
-        } 
-      } else {
-        this.soundMute = true;
-        soundTrigger.anims.play("soundPictureOff")
-        if (this.gameStarted) {
-          this.windSound.stop();
-        }
-      }
-    })
-
 
     this.io.emit(gameSceneFromClient.sceneReady);
   }
@@ -260,7 +227,6 @@ export class GameScene extends Phaser.Scene {
       if (zoom > 0.5 && zoom < 1.2) {
         this.cameras.main.setZoom(zoom)
       }
-
     });
   }
 }

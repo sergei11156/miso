@@ -119,7 +119,9 @@ export default class userConnectionManager {
   }
 
   remove(connection: userConnection, id: number) {
-    connection.send.removeDude(id);
+    if (id) {
+      connection.send.removeDude(id);
+    }
     this.connections.delete(connection);
     this.updateUsersList();
   }

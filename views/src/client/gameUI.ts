@@ -28,7 +28,12 @@ export default class GameUI {
   gameEndList: HTMLUListElement;
   onGameStartAgainButtonClick: () => void;
 
-  constructor(io: SocketIOClient.Socket, scene: GameScene, roomName: string, isGameStarted: boolean) {
+  constructor(
+    io: SocketIOClient.Socket,
+    scene: GameScene,
+    roomName: string,
+    isGameStarted: boolean
+  ) {
     this.io = io;
     this.scene = scene;
     this.gameUI = document.querySelector(".gameUi");
@@ -41,8 +46,8 @@ export default class GameUI {
         copyTextToClipboard(roomName);
         e.classList.add("copied");
         setTimeout(() => {
-          e.classList.remove("copied")
-        }, 1000)
+          e.classList.remove("copied");
+        }, 1000);
       });
     });
 
@@ -125,7 +130,22 @@ export default class GameUI {
         this.io.emit(userInputEvents.ready);
       }, 700);
     };
-    
+    const soundTrigger = document.querySelector(".soundController");
+    soundTrigger.addEventListener("click", () => {
+      if (scene.soundMute) {
+        scene.soundMute = false;
+        if (scene.gameStarted) {
+          scene.windSound.play({ loop: true, volume: 0.8 });
+        }
+        soundTrigger.classList.remove("off")
+      } else {
+        scene.soundMute = true;
+        soundTrigger.classList.add("off")
+        if (scene.gameStarted) {
+          scene.windSound.stop();
+        }
+      }
+    });
     if (isGameStarted) {
       this.openGameEndUI();
     }
@@ -157,7 +177,7 @@ export default class GameUI {
       nameAndScore.textContent = text;
 
       userScoreText.appendChild(nameAndScore);
-      userScoreText.appendChild(this.generateStatusSpan(user.statusReady))
+      userScoreText.appendChild(this.generateStatusSpan(user.statusReady));
       this.gameEndList.appendChild(userScoreText);
     }
 
@@ -259,16 +279,14 @@ export default class GameUI {
         statusContainer.textContent = "не готов";
         statusContainer.classList.add("notready");
     }
-    return statusContainer
+    return statusContainer;
   }
 }
-
-
 
 function fallbackCopyTextToClipboard(text: string) {
   var textArea = document.createElement("textarea");
   textArea.value = text;
-  
+
   // Avoid scrolling to bottom
   textArea.style.top = "0";
   textArea.style.left = "0";
@@ -279,11 +297,11 @@ function fallbackCopyTextToClipboard(text: string) {
   textArea.select();
 
   try {
-    var successful = document.execCommand('copy');
-    var msg = successful ? 'successful' : 'unsuccessful';
-    console.log('Fallback: Copying text command was ' + msg);
+    var successful = document.execCommand("copy");
+    var msg = successful ? "successful" : "unsuccessful";
+    console.log("Fallback: Copying text command was " + msg);
   } catch (err) {
-    console.error('Fallback: Oops, unable to copy', err);
+    console.error("Fallback: Oops, unable to copy", err);
   }
 
   document.body.removeChild(textArea);
@@ -293,9 +311,12 @@ function copyTextToClipboard(text: string) {
     fallbackCopyTextToClipboard(text);
     return;
   }
-  navigator.clipboard.writeText(text).then(function() {
-    console.log('Async: Copying to clipboard was successful!');
-  }, function(err) {
-    console.error('Async: Could not copy text: ', err);
-  });
+  navigator.clipboard.writeText(text).then(
+    function () {
+      console.log("Async: Copying to clipboard was successful!");
+    },
+    function (err) {
+      console.error("Async: Could not copy text: ", err);
+    }
+  );
 }

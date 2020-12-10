@@ -52,7 +52,7 @@ export default class Dude extends GameObject {
     super.updatePos(x + Dude.defaultXOffset, y);
     if (this.playerDude) {
       if(Platform.hasPlatformsAroundPoint(this.sprite.getCenter())) {
-        this.scene.cameras.main.shake(100, .007)
+        this.scene.cameras.main.shake(50, .007)
       }
     }
     // this.closezone.setPosition(x, y)

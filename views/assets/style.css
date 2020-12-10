@@ -258,3 +258,18 @@ body {
   background: none;
   width: unset;
 }
+
+.soundController {
+  background: url(/assets/sound.svg) no-repeat;
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 45px;
+  height: 38px;
+  background-size: cover;
+  margin-top: 5px;
+  margin-right: 5px;
+}
+.soundController.off {
+  background-position-x: right;
+}
