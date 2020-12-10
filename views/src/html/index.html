@@ -14,14 +14,49 @@
           type="text"
           placeholder="Введите имя"
           required
+          maxlength="15"
+          minlength="1"
         />
 
         <input id="playButton" type="submit" value="Играть!" />
         <div class="joinSpecialRoom">
-          <div class="nameofRoomDesc">Чтобы присоединиться к конкретной комнате введите её название:</div>
-          <input id="inputNameOfRoom" type="text" placeholder="Название комнаты" maxlength="5" minlength="5">
+          <div class="nameofRoomDesc">
+            Чтобы присоединиться к конкретной комнате введите её название:
+          </div>
+          <input
+            id="inputNameOfRoom"
+            type="text"
+            placeholder="Название комнаты"
+            maxlength="5"
+            minlength="5"
+          />
         </div>
       </form>
+
+      <div class="tutorial t1">
+        <div class="desc">
+          Чтобы спасти вашего чувака перетаскивайте огонь. Спасательная шлюпка
+          послана только одна, только 1 из вас может спастись. <br />
+          При наведении на огонь мышкой, он подсвечивается зелёным, это значит,
+          что вы можете схватить и перетащить огонь
+        </div>
+        <div class="imgFire"></div>
+      </div>
+      <div class="tutorial t2">
+        <div class="desc">
+          Вокруг вражеских чуваков есть зона, которая при наведении
+          подсвечивается красным, если вы перетащите в неё огонь он перейдёт в
+          другое измерение, для вас это будет выглядеть как таинственное
+          исчезновение
+        </div>
+        <div class="cloosedZoneImg"></div>
+      </div>
+      <div class="tutorial t3">
+        <div class="desc">
+          Вы можете уменьшить масштаб игры покрутив колёсико мыши или сделав
+          жест уменьшения экрана
+        </div>
+      </div>
     </div>
     <div class="gameUi">
       <div class="roomName"></div>

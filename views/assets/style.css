@@ -4,19 +4,23 @@ body {
 .startScreenContainer {
   position: absolute;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   justify-content: center;
   display: flex;
   align-items: center;
   flex-direction: column;
-  background-color: #5dade2;
+  background-color: #5da6e0ff;
+  font-family: Arial, Helvetica, sans-serif;
 }
 #inputYourName {
   font-size: 20px;
   width: 100%;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
   height: 30px;
   max-width: 500px;
+  text-align: center;
+  background: no-repeat;
+  border: none;
 }
 #playButton {
   background-color: #0ab30a;
@@ -28,9 +32,28 @@ body {
   outline: none;
   border: none;
 }
-.startScreenContainer form {
+.startScreenContainer form,
+.tutorial {
   width: 60%;
   max-width: 500px;
+  background: url("/assets/clouds.svg") no-repeat;
+  background-size: cover;
+  padding: 50px 47px;
+}
+@media screen and (max-width: 426px) {
+  .startScreenContainer form,
+  .tutorial {
+    width: 60%;
+    max-width: 500px;
+    background: url("/assets/cloudsmobile.svg") no-repeat;
+    background-size: cover;
+    padding: 80px 47px;
+  }
+}
+.nameofRoomDesc {
+  background-color: #ffffff87;
+  margin-top: 25px;
+  text-align: center;
 }
 .gameUi {
   display: none;
@@ -38,6 +61,7 @@ body {
   background-color: #00000038;
   padding: 10px;
   color: white;
+  font-family: Arial, Helvetica, sans-serif;
 }
 .users {
   margin: 5px 0;
@@ -87,6 +111,7 @@ body {
   align-items: center;
   flex-direction: column;
   padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
 }
 .gameEnd .appearAnimationContainer {
   background-color: #173144;
@@ -134,8 +159,8 @@ body {
   color: #000000;
 }
 .gameEnd .usersListWithScore {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 .gameEnd .usersListWithScore li {
   display: flex;
@@ -148,3 +173,67 @@ body {
 .gameEnd .usersListWithScore li .notready {
   color: #c80707;
 }
+
+#inputNameOfRoom {
+  margin-top: 25px;
+  width: 100%;
+  font-size: 20px;
+  text-align: center;
+  background-color: none;
+  background: none;
+  border: none;
+}
+.tutorial {
+  display: flex;
+}
+
+.tutorial .desc {
+  background-color: #ffffff87;
+  width: 50%;
+}
+
+.tutorial .imgFire {
+  background: url(/assets/tutorialFire.svg) no-repeat;
+  background-size: contain;
+  width: 200px;
+  background-position: center;
+}
+
+.tutorial .cloosedZoneImg {
+  background: url(/assets/tutorialCloseZone.svg) no-repeat;
+  background-size: contain;
+  background-position: center;
+  width: 200px;
+}
+
+.tutorial.t3 .desc {
+  width: 100%;
+  text-align: center;
+  margin-top: 60px;
+}
+
+.tutorial.t1 {
+  padding-top: 70px;
+  padding-bottom: 51px;
+}
+
+.tutorial.t2 {
+  padding-top: 90px;
+  padding-bottom: 80px;
+}
+
+
+@media screen and (max-width: 426px) {
+  .tutorial {
+    display: block;
+  }
+  .tutorial .desc {
+    width: 100%;
+  }
+  .cloosedZoneImg, .imgFire {
+    width: 100%;
+    height: 200px;
+    margin: auto;
+  }
+}
+
