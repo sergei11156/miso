@@ -50,11 +50,11 @@ export default class Dude extends GameObject {
 
   updatePos(x: number, y: number) {
     super.updatePos(x + Dude.defaultXOffset, y);
-    if (this.playerDude) {
-      if(Platform.hasPlatformsAroundPoint(this.sprite.getCenter())) {
-        this.scene.cameras.main.shake(50, .007)
-      }
-    }
+    // if (this.playerDude) {
+    //   if(Platform.hasPlatformsAroundPoint(this.sprite.getCenter())) {
+    //     this.scene.cameras.main.shake(50, .007)
+    //   }
+    // }
     // this.closezone.setPosition(x, y)
   }
   updateAnimations() {

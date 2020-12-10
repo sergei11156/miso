@@ -82,7 +82,9 @@ export default class DudeServer extends GameObject {
     if (this.body.velocity.x != 0) {
       const centre = this.getCenter();
       if (this.xAxis - 3 > centre.x && centre.x < this.xAxis + 3) {
-        this.setVelocityX(0);
+        if (this.setVelocityX) {
+          this.setVelocityX(0);
+        }
       }
     }
     if (this.active) {

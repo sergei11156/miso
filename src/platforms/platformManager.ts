@@ -115,8 +115,8 @@ export default class PlatformManager {
   }
 
   clearXAxis(xAxis: number) {
-    const xmin = xAxis - this.yOffsetOfDude /2;
-    const xmax = xAxis + this.yOffsetOfDude /2;
+    const xmin = xAxis - 150;
+    const xmax = xAxis + 150;
     this.platforms.children.each((platform: PlatformServer) => {
       const platformX = platform.getCenter().x;
       if (xmin <= platformX && platformX <= xmax) {
