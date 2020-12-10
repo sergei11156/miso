@@ -8,6 +8,7 @@ import userConnection from "./userConnection";
 import Room from "../rooms/room";
 import DudeServer from "../dude/dudeServer";
 import { userInputEvents } from "../interfaces/interfaces";
+import { platformEventsFromServer } from "../interfaces/platformInterfaces";
 
 export default class userConnectionManager {
   connections: Set<userConnection> = new Set();
@@ -133,5 +134,9 @@ export default class userConnectionManager {
   }
   timerUpdater(time: number) {
     this.io.to(this.room).emit(gameSceneFromServer.gameStartTimerUpdate, time);
+  }
+
+  sendDestroyPlatformToAll(id: number) {
+    this.io.to(this.room).emit(platformEventsFromServer.destroyPlatform, { id });
   }
 }

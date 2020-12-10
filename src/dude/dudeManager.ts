@@ -88,7 +88,7 @@ export default class DudeManager {
     throw new Error(`dude ${id} not found`);
   }
 
-  onSomeoneDie() {
+  onSomeoneDie(xAxis: number) {
     if (this.countAlive() < 2) {
       console.log("game end");
       let aliveDude = this.dudes.getFirstAlive() as DudeServer;
@@ -101,6 +101,7 @@ export default class DudeManager {
       return;
     }
     this.softArrangeDudes()
+    this.platformManager.clearXAxis(xAxis);
   }
   softArrangeDudes() {
     let dudes = this.dudes.children.getArray() as DudeServer[];

@@ -4,6 +4,7 @@ import PlatformServer from "./PlatformServer";
 import { platformCreate, platformEventsFromServer } from "../interfaces/platformInterfaces";
 import { CreateContextOptions } from "vm";
 import userConnection from "../connection/userConnection";
+import userConnectionManager from "../connection/userConnectionManager";
 
 export default class PlatformManager {
   platforms: Phaser.Physics.Arcade.Group;
@@ -12,6 +13,7 @@ export default class PlatformManager {
   yOffsetOfDude = 200;
 
   gameStarted: boolean = false;
+  connectionManager: userConnectionManager;
 
   update(delta: number, dudes: DudeServer[]) {
     this.platformTimer += delta;
@@ -37,7 +39,7 @@ export default class PlatformManager {
   }
 
   spawnPlatform(dude: DudeServer) {
-    let playerBottomCenter = dude.getBottomCenter();
+    const playerBottomCenter = dude.getBottomCenter();
     const yOffset = this.yOffsetOfDude / 2;
     let platformX =
       playerBottomCenter.x - Phaser.Math.Between(-yOffset, yOffset);
@@ -111,4 +113,17 @@ export default class PlatformManager {
       console.log(error);
     }
   }
+
+  clearXAxis(xAxis: number) {
+    const xmin = xAxis - this.yOffsetOfDude /2;
+    const xmax = xAxis + this.yOffsetOfDude /2;
+    this.platforms.children.each((platform: PlatformServer) => {
+      const platformX = platform.getCenter().x;
+      if (xmin <= platformX && platformX <= xmax) {
+        this.connectionManager.sendDestroyPlatformToAll(platform.id);
+        platform.destroy();
+      }
+    })
+  }
+
 }

@@ -34,6 +34,7 @@ export class GameScene extends Phaser.Scene {
     const platforms = this.physics.add.group();
     const dudesGroup = this.physics.add.group();
     this.platformManager = new PlatformManager(this.io, platforms);
+    
     this.dudeManager = new DudeManager(
       dudesGroup,
       this.worldWidth / 2,
@@ -54,6 +55,7 @@ export class GameScene extends Phaser.Scene {
       this,
       params.room
     );
+    this.platformManager.connectionManager = this.userConnectionManager
   }
 
   create() {
@@ -126,9 +128,10 @@ export class GameScene extends Phaser.Scene {
     socket.on("disconnect", (reason) => {
       let removeId = dude.id;
       if (dude) {
+        const xAxis = dude.getCenter().x
         this.dudeManager.dudes.remove(dude, true, true);
         if (this._gameStarted) {
-          this.dudeManager.onSomeoneDie();
+          this.dudeManager.onSomeoneDie(xAxis);
         }
       }
       if (uis) {

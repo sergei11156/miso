@@ -97,25 +97,14 @@ export default class DudeServer extends GameObject {
   }
 
   youDied() {
-    const oldId = this.id;
     this.setVelocityY(0);
     this.setVelocityX(0);
     this.setActive(false);
 
-    // const newId = DudeServer.dudes.getFirstAlive() as DudeServer;
 
-    // const youDie: youDie = {
-    //   id: oldId,
-    // };
-    // if (newId) {
-    //   youDie.newFollowId = newId.id;
-    // }
-    // const dieData: die = { id: oldId };
-    // this.socket.emit(userInputEvents.youDie, youDie);
-    // this.socket.broadcast.emit(userInputEvents.die, dieData);
     let score = this.dudeManager.imDeadGetMyScore();
     this.connection.send.die(score);
-    this.dudeManager.onSomeoneDie();
+    this.dudeManager.onSomeoneDie(this.getCenter().x);
   }
 
   youWin() {
