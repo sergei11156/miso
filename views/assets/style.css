@@ -273,3 +273,7 @@ body {
 .soundController.off {
   background-position-x: right;
 }
+
+.appearAnimationContainer .roomName {
+  margin-top: 10px;
+}
