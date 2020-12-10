@@ -222,4 +222,14 @@ export default class Platform extends GameObject {
     }
     this.sprite.anims.play("fireAnimation", true);
   }
+
+  static hasPlatformsAroundPoint(point: Phaser.Math.Vector2) {
+    for (const platform of this.platforms) {
+      const pcentre = platform.sprite.getCenter();
+      if (Phaser.Math.Distance.BetweenPoints(point, pcentre) < 100) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

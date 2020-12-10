@@ -26,7 +26,6 @@ export class GameScene extends Phaser.Scene {
   private gameObjects: GameObject[] = [];
   private io: SocketIOClient.Socket;
   statusText: Phaser.GameObjects.Text;
-  youDieText: Phaser.GameObjects.Text;
   pointer: Pointer;
   redzones: Phaser.Physics.Arcade.Group;
   platforms: Phaser.Physics.Arcade.Group;
@@ -35,6 +34,7 @@ export class GameScene extends Phaser.Scene {
   gameUIClass: GameUI;
   gameStarted: boolean = false;
   pointerManager: PointerManager;
+  windSound: Phaser.Sound.BaseSound;
 
   init(params: { io: SocketIOClient.Socket; roomName: string, isGameStarted: boolean }) {
     this.io = params.io;
@@ -86,22 +86,15 @@ export class GameScene extends Phaser.Scene {
       "rexGestures",
       "rexGestures"
     );
+    this.load.audio("wind", "assets/wind.mp3");
   }
 
   create(): void {
     this.setPinch();
-
-
-    // const test = this.physics.add.sprite(2000, 300, "ground")
-    // this.platforms.add(test);
-    // this.pointer = new Pointer(this, this.platforms);
-    // this.input.setDefaultCursor("url(assets/cursor.png), pointer")
-
+    this.windSound = this.sound.add("wind");
     Platform.init(this.io);
-    // Platform.add(this, {id: 100, x: 2000, y: 300}, this.platforms)
 
     this.io.on(userInputEvents.update, (params: gameUpdateObject) => {
-      // console.log("update " + params.id);
       try {
         let gameObject = this.getGameObject(params.id);
 
@@ -141,6 +134,7 @@ export class GameScene extends Phaser.Scene {
 
   gameStop() {
     Platform.imDead = true;
+    this.windSound.stop();
     this.gameStarted = false;
   }
 
@@ -165,15 +159,13 @@ export class GameScene extends Phaser.Scene {
 
   restartGame() {
     this.gameStarted = true;
-    console.log("restartGAME");
-    // this.statusText.text = "СТАТУС: НЕ ГОТОВ";
     this.gameUIClass.gameStart();
     this.gameUIClass.setButtonReadyState(false);
+    this.windSound.play({
+      loop: true,
+      volume: 0.8
+    })
 
-    if (this.youDieText) {
-      this.youDieText.destroy();
-      this.youDieText = undefined;
-    }
     Platform.imDead = false;
     for (const gameObject of this.gameObjects) {
       gameObject.destroy();

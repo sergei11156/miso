@@ -2,6 +2,7 @@ import { gameUpdateObject } from "./interfaces/interfaces";
 import GameObject from "./gameObject";
 import { GameScene } from "./gameScene";
 import { createDude } from "./interfaces/dudeInterfaces";
+import Platform from "./Platform";
 
 export default class Dude extends GameObject {
   static dudes: Set<Dude> = new Set();
@@ -47,6 +48,11 @@ export default class Dude extends GameObject {
 
   updatePos(x: number, y: number) {
     super.updatePos(x + Dude.defaultXOffset, y);
+    if (this.playerDude) {
+      if(Platform.hasPlatformsAroundPoint(this.sprite.getCenter())) {
+        this.scene.cameras.main.shake(100, .007)
+      }
+    }
     // this.closezone.setPosition(x, y)
   }
   updateAnimations() {
