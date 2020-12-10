@@ -183,7 +183,7 @@ export default class GameUI {
     this.gameEndScore.textContent = "#" + score;
 
     if (score == 1) {
-      this.gameEndUnderScore.textContent = "Вы победил!";
+      this.gameEndUnderScore.textContent = "Вы победили!";
     } else {
       this.gameEndUnderScore.textContent = "У вас " + score + " место. ";
     }
