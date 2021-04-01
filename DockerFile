@@ -9,5 +9,4 @@ COPY src/* src/
 
 
 RUN npm install
-RUN npx tsc
 CMD ["npx", "nodemon", "dist/app.js" ]
